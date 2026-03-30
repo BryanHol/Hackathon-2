@@ -1,6 +1,6 @@
 
 body {
-	margin:15%;
+	margin:5%;
 	background-color:lightgrey;
 
 }
@@ -25,4 +25,5 @@ chat-box {
 	grid-column:2/span1;
 	background-color:white;
 	padding:5px;
+	float:right;
 }
