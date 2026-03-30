@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             // Separated message with tags for separate styling
             newMessage.innerHTML = `
-                <span class="timeStamp">[${timeStamp}]</span>
+                <span class="timeStamp">${timeStamp}</span>
                 <strong>${username}:</strong>
                 <span class="text">${messageText}</span>
             `;
