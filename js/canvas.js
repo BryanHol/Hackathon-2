@@ -120,6 +120,10 @@ class Artist {
         this.last_pos = { x: -1, y: -1 };
     }
 
+    clear() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
     // Enable drawing inputs
     setupInput() {
         // Touch Events
@@ -153,4 +157,7 @@ class Artist {
 
 window.addEventListener('load', () => {
     const canvasArtist = new Artist();
+    document.getElementById("clear").addEventListener("click", () => {
+        canvasArtist.clear();
+    });
 });
