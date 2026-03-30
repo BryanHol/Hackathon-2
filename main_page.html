@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Collabrative Drawing</title>
+        <meta name="keywords" content="Collabrative, Drawing, Canvas">
+        <meta name="author" content="Andrea, Bryan, David, Peter">
+        <meta name="description" content="Draw together with a team">
+
+				<script src="textchat.js"></script>
+				<script src="js/canvas.js"></script>
+
+        
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <header>
+            <h1>Drawi</h1>
+        </header>
+
+        <main-container>
+        <canvas id="canvas" width="800" height="600"></canvas>
+        
+
+				<chat-box>
+
+   		 <div id="usernameDisplay">
+     		   <input type="text" id="usernameInput" autocomplete="off" placeholder="Enter your username">
+      		  <button id="saveUsernameButton">Save</button>
+ 		   </div>
+
+ 		   <div id="chatHistory"></div>
+
+ 		   <div id="writeBox">
+  		      <input type="text" id="chatInput" autocomplete="off" placeholder="Type a message...">
+ 		       <button id="sendButton">Send</button>
+	    </div>
+
+				</chat-box>
+
+
+				</main-container>
+
+        <footer>
+           <p>Foot</p> 
+        </footer>
+    </body>
+</html>
