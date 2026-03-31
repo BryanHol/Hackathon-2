@@ -28,6 +28,7 @@ Andrea to replace with their amazing styling techniques
 }
 
 #usernameDisplay {
+    position: absolute;
     top: 10px;    /* Distance from the top */
     right: 10px;  /* Distance from the right */
     font-weight: bold;
