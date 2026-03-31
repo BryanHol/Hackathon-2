@@ -15,16 +15,40 @@
 		<link rel="stylesheet" href="main_style.css">
     </head>
     <body>
-        <header>
-            <h1>Drawing</h1>
-        </header>
 
         <main-container>
-        <canvas id="canvas" width="800" height="600"></canvas>
-				<button id="clear">Clear canvas?</button>
-        
-			<chat-box>
+            
+        <header>
+            <h1>Drawing together</h1>
+        </header>
+        <canvas-box>
+            <table>
+                <tr>
+                    <th><canvas id="canvas" width="800" height="600"></canvas></th>
+                </tr>
+                <tr>
+                    <th>
+                        <button id="clear">Clear canvas?</button>
+                        <label>
+                        <input type="radio" name="tool" value="paint" checked>
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.VChfsjzKbSqzD3D7q65eJgHaJd?rs=1&pid=ImgDetMain&o=7&rm=3" height="50px" width="50px" alt="Paint brush">
+                        </label>
 
+                        <label>
+                        <input type="radio" name="tool" value="eraser">
+                        <img src="https://images.freeimages.com/images/large-previews/74b/eraser-1423965.jpg" height="50px" width="50px"  alt="Eraser">
+                        </label>
+
+                        <label>
+                        <input type="radio" name="tool" value="bucket">
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.88s5T-A4_X7wsGKlApc0qgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" height="50px" width="50px"  alt="Eraser">
+                        </label>
+                    </th>
+                </tr>
+            </table>
+        </canvas-box>
+
+		<chat-box>
    		 <div id="usernameDisplay">
      		   <input type="text" id="usernameInput" autocomplete="off" placeholder="Enter your username">
       		  <button id="saveUsernameButton">Save</button>
@@ -42,8 +66,5 @@
 
 				</main-container>
 
-        <footer>
-           <p>Foot</p> 
-        </footer>
     </body>
 </html>
