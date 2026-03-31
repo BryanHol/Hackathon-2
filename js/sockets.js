@@ -19,10 +19,21 @@ socket.addEventListener("open", (event) => {
 socket.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
 
-
+    if(event.data.type == "message"){
+        // Place message into DOM
+        message = event.data.message;
+        display_name = 
+        add_message(message, display_name, time)
+    } else if (event.data.type == "drawing"){
+        canvasArtist.queueAction(to_pos);
+    } else if (event.data.type == "tool_change"){
+        canvasArtist.tool(tool);
+    }
 
 });
 
 function sendBlob(blob) {
     socket.send(blob);
 }
+
+const canvasArtist = new Artist();
