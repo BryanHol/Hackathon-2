@@ -1,3 +1,13 @@
+/*
+
+    Canvas.js
+
+    Peter Ursem
+
+    Handle touch inputs and draw data to the canvas.
+
+*/
+
 class Artist {
     canvas;
     context;
@@ -20,6 +30,10 @@ class Artist {
         this.handleStart = this.handleStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
+
+        document.getElementById("clear").addEventListener("click", () => {
+            this.clear();
+        });
 
         this.setupInput();
         return this;
@@ -49,10 +63,16 @@ class Artist {
     }
 
     // Update the tool info
+    // CALL THIS TO CHANGE COLOURS AND WIDTH
     swapTool(tool, width, colour) {
-        this.tool = tool;
+        this.tool = tool; 
         this.width = width;
         this.colour = colour;
+    }
+
+    fill(at_pos) {
+        // Code to fill the area at {x, y}
+        // Ensure that this only fills unicolour areas ad respects lines
     }
 
     // Draw the path described by the given CanvasAction
@@ -157,7 +177,4 @@ class Artist {
 
 window.addEventListener('load', () => {
     const canvasArtist = new Artist();
-    document.getElementById("clear").addEventListener("click", () => {
-        canvasArtist.clear();
-    });
 });
