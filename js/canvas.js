@@ -1,11 +1,11 @@
 class Artist {
     canvas;
     context;
-
+/*
     tool = 0;	// 0: Brush, 1: Bucket
     width = 5;	// Line in px
     colour = "#000000"; // Drawing colour
-
+*/
     actions = [];	// An array of CanvasAction objects
 
     last_pos = { x: -1, y: -1 };
@@ -22,6 +22,9 @@ class Artist {
         this.handleEnd = this.handleEnd.bind(this);
 
         this.setupInput();
+        
+        this.swapTool(0, 5, "#ff0000ff");
+
         return this;
     }
 
@@ -62,6 +65,7 @@ class Artist {
         this.context.lineJoin = "round";
         this.context.lineCap = "round";
 
+        /* add tool type later */
         this.context.strokeStyle = this.colour;
         this.context.lineWidth = this.width;
 
@@ -160,12 +164,14 @@ window.addEventListener('load', () => {
     document.getElementById("clear").addEventListener("click", () => {
         canvasArtist.clear();
        
-    }); /*
-    if (document.getElementById("paint").checked = true){
-        this.swapTool(0, 5, "#000000");
-    }
-    if (document.getElementById("eraser").checked = true){
-        this.swapTool(0, 5, "#ffffffff");
-    }
-        */
+    }); 
+    document.getElementById("paint").addEventListener("click", () => {
+        canvasArtist.swapTool(0, 5, "#000000ff");
+    });
+
+    document.getElementById("eraser").addEventListener("click", () => {
+        canvasArtist.swapTool(0, 15, "#ffffffff");
+    });
 });
+
+
