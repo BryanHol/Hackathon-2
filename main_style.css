@@ -1,4 +1,4 @@
-
+	
 body {
 	margin:0.5% 2.5%;
 	background-image: url(https://logodix.com/logo/1983595.png);
@@ -11,6 +11,7 @@ main-container {
 	grid-template-rows: 12% 75% 13%;
 	grid-template-columns: 3fr 2fr;
 	background-color:rgb(77, 77, 77);
+	border-radius: 3px;
 }
 
 canvas-box {
@@ -21,11 +22,13 @@ canvas-box {
 canvas {
 	background-color: white;
 	margin: 0.5% 3.5%;
+	border-radius: 3px;
 }
 
 header {
 	grid-row:1/2;
 	grid-column:2/3;
+	border-radius: 3px;
 }
 h1 {
 	font-size: 50px;
@@ -40,6 +43,7 @@ chat-box {
 	background-color:rgb(197, 197, 197);
 	padding:5px;
 	margin: 3.5%;
+	border-radius: 3px;
 }
 
 /* From stackoverflow 
@@ -53,6 +57,7 @@ https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons
 
 [type=radio] + img {
   cursor: pointer;
+	border-radius: 3px;
 }
 
 [type=radio]:checked + img {
