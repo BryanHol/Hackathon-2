@@ -20,6 +20,22 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDisplayName();
     } 
     
+    // Function to add message to chat history
+    function addMessage(messageText, username, timeStamp) {
+        // Format construct message to embed into DOM
+        const newMessage = document.createElement("div"); // create element for the message 
+        newMessage.className = "chatMessage"; // optional class for css styling
+        newMessage.innerHTML = `
+            <span class="timeStamp">${timeStamp}</span>
+            <strong>${username}:</strong>
+            <span class="text">${messageText}</span>
+        `;
+        
+        // append message as child to chatHistory container
+        chatHistory.appendChild(newMessage);
+        chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
+            
+    }
 
     // Message handling function
     function sendMessage() {
@@ -27,19 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const timeStamp = getTimeStamp();
     
         if (messageText !=="") { // prevent empty message
-            const newMessage = document.createElement("div"); // create element for the message 
-            newMessage.className = "chatMessage"; // optional class for css styling
-            
-            // Separated message with tags for separate styling
-            newMessage.innerHTML = `
-                <span class="timeStamp">${timeStamp}</span>
-                <strong>${username}:</strong>
-                <span class="text">${messageText}</span>
-            `;
-            //newMessage.textContent = `${username}: ${messageText}`; // set text content - ** Need backtick not quotes for variable syntax like this! **
-            chatHistory.appendChild(newMessage); // append message as child to chatHistory container
-            
-            chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
+
+            // Display message in chat history
+            addMessage(messageText, username, timeStamp);
+
             chatInput.value = ""; // clear input box after send
         }
     }
