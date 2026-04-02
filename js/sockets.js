@@ -21,9 +21,9 @@ socket.addEventListener("message", (event) => {
 
     if(event.data.type == "message"){
         // Place message into DOM
-        messageText = event.data.message;
-        username = event.data.username;
-        time = event.data.timeStamp;
+        const messageText = event.data.messageText;
+        const username = event.data.username;
+        const time = event.data.timeStamp;
         addMessage(messageText, username, timeStamp);
     } else if (event.data.type == "drawing"){
         canvasArtist.queueAction(to_pos);
