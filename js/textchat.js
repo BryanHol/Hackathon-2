@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             timeStamp: timeStamp
             
         };
-        return JSON.stringify(messageObject);
+        return messageObject;
     }
     
     // Function to show message to chat history
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
             showMessage(messageText, username, timeStamp);
 
             // Create Message Object
-            const messageJSON = createMessageJSON();
+            const messageJSON = createMessageJSON(messageText, username, timeStamp);
             
             // Send message object to server
             //sendJSON(messageJSON);
