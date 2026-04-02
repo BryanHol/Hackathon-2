@@ -159,5 +159,13 @@ window.addEventListener('load', () => {
     const canvasArtist = new Artist();
     document.getElementById("clear").addEventListener("click", () => {
         canvasArtist.clear();
-    });
+       
+    }); /*
+    if (document.getElementById("paint").checked = true){
+        this.swapTool(0, 5, "#000000");
+    }
+    if (document.getElementById("eraser").checked = true){
+        this.swapTool(0, 5, "#ffffffff");
+    }
+        */
 });
