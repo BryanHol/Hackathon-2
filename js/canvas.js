@@ -1,11 +1,11 @@
 class Artist {
     canvas;
     context;
-/*
+
     tool = 0;	// 0: Brush, 1: Bucket
     width = 5;	// Line in px
     colour = "#000000"; // Drawing colour
-*/
+
     actions = [];	// An array of CanvasAction objects
 
     last_pos = { x: -1, y: -1 };
@@ -23,7 +23,7 @@ class Artist {
 
         this.setupInput();
         
-        this.swapTool(0, 5, "#ff0000ff");
+        this.swapTool(0, 5, "#000000ff");
 
         return this;
     }
@@ -166,11 +166,19 @@ window.addEventListener('load', () => {
        
     }); 
     document.getElementById("paint").addEventListener("click", () => {
-        canvasArtist.swapTool(0, 5, "#000000ff");
+        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value);
     });
 
     document.getElementById("eraser").addEventListener("click", () => {
-        canvasArtist.swapTool(0, 15, "#ffffffff");
+        canvasArtist.swapTool(0, canvasArtist.width, "#ffffffff");
+    });
+
+    document.getElementById("colour").addEventListener("change", () => {
+        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value); 
+    });
+
+    document.getElementById("width").addEventListener("change", () => {
+        canvasArtist.swapTool(0, document.getElementById("width").value, canvasArtist.colour);
     });
 });
 
