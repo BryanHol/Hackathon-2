@@ -5,7 +5,7 @@ Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
 */
 
-import {sendJSON} from './sockets.js';
+//import {sendJSON} from './sockets.js'; - requires modules which requires server hosting of html
 
 // Listener wrapper to ensure page is loaded before trying to find content
 document.addEventListener("DOMContentLoaded", () => {
@@ -66,7 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const messageJSON = createMessageJSON();
             
             // Send message object to server
-            sendJSON(messageJSON);
+            //sendJSON(messageJSON);
+            window.sendJSON(messageJSON);
 
             chatInput.value = ""; // clear input box after send
         }

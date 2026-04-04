@@ -16,7 +16,8 @@ socket.addEventListener("open", (event) => {
 });
 
 // Send JSON object to server
-export function sendJSON(jsonObj) {
+//export function sendJSON(jsonObj) { - requires modules which requires server hosting of html
+window.sendJSON = function(jsonObj) {
     socket.send(jsonObj);
 }
 
