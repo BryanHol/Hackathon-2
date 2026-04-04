@@ -2,7 +2,7 @@
 
     Sockets.js
 
-    Peter Ursem
+    Peter Ursem & David Caudron
 
     Handle live IO from the server and pass data to the chat and canvas handlers.
 
@@ -14,6 +14,11 @@ const socket = new WebSocket('ws://localhost:8000');
 socket.addEventListener("open", (event) => {
     socket.send("Hello Server!");
 });
+
+// Send JSON object to server
+export function sendJSON(jsonObj) {
+    socket.send(jsonObj);
+}
 
 // Listen for messages
 socket.addEventListener("message", (event) => {

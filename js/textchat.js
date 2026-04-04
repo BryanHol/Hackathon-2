@@ -5,6 +5,8 @@ Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
 */
 
+import {sendJSON} from './sockets.js';
+
 // Listener wrapper to ensure page is loaded before trying to find content
 document.addEventListener("DOMContentLoaded", () => {
     const sendButton = document.getElementById("sendButton");
@@ -19,6 +21,19 @@ document.addEventListener("DOMContentLoaded", () => {
         username = savedUsername;
         updateDisplayName();
     } 
+
+    // Function to create a message JSON object
+    function createMessageJSON(messageText, username, timeStamp) {
+        const messageObject = {
+            type: "message", // could be used for server / socket routing
+            data: {
+                messageText: messageText,
+                username: username,
+                timeStamp: timeStamp
+            }
+        };
+        return JSON.stringify(messageObject);
+    }
     
     // Function to add message to chat history
     function addMessage(messageText, username, timeStamp) {
@@ -46,6 +61,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Display message in chat history
             addMessage(messageText, username, timeStamp);
+
+            // Create Message Object
+            const messageJSON = createMessageJSON();
+            
+            // Send message object to server
+            sendJSON(messageJSON);
 
             chatInput.value = ""; // clear input box after send
         }
