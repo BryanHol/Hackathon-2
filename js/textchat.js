@@ -26,17 +26,17 @@ document.addEventListener("DOMContentLoaded", () => {
     function createMessageJSON(messageText, username, timeStamp) {
         const messageObject = {
             type: "message", // could be used for server / socket routing
-            data: {
-                messageText: messageText,
-                username: username,
-                timeStamp: timeStamp
-            }
+            messageText: messageText,
+            username: username,
+            timeStamp: timeStamp
+            
         };
         return JSON.stringify(messageObject);
     }
     
-    // Function to add message to chat history
-    function addMessage(messageText, username, timeStamp) {
+    // Function to show message to chat history
+    //function showMessage(messageText, username, timeStamp) {
+    window.showMessage = function(messageText, username, timeStamp) {
         // Format construct message to embed into DOM
         const newMessage = document.createElement("div"); // create element for the message 
         newMessage.className = "chatMessage"; // optional class for css styling
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (messageText !=="") { // prevent empty message
 
             // Display message in chat history
-            addMessage(messageText, username, timeStamp);
+            showMessage(messageText, username, timeStamp);
 
             // Create Message Object
             const messageJSON = createMessageJSON();

@@ -30,7 +30,8 @@ socket.addEventListener("message", (event) => {
         const messageText = event.data.messageText;
         const username = event.data.username;
         const time = event.data.timeStamp;
-        addMessage(messageText, username, timeStamp);
+        window.showMessage(messageText, username, timeStamp);
+        //showMessage(messageText, username, timeStamp);
     } else if (event.data.type == "drawing"){
         canvasArtist.queueAction(to_pos);
     } else if (event.data.type == "tool_change"){
