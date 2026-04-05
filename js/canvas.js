@@ -28,8 +28,10 @@ class Artist {
 
 		// Bind functions
         this.handleStart = this.handleStart.bind(this);
+        this.inputStart = this.inputStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
+        this.inputEnd = this.inputEnd.bind(this);
 
         document.getElementById("clear").addEventListener("click", () => {
             this.clear();
@@ -117,11 +119,18 @@ class Artist {
         };
     }
 
-    handleStart(event) {
+    handleStart(pos) {
+        this.drawing = true;
+        this.last_pos = pos;
+    }
+
+    inputStart(event) {
         event.preventDefault();
 
-        this.drawing = true;
-        this.last_pos = this.getCoordinates(event);
+        const pos = this.getCoordinates(event);
+
+        this.handleStart(pos);
+        window.sendJSON({type:"draw_start", ...pos});
     }
 
     handleMove(event) {
@@ -129,16 +138,22 @@ class Artist {
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
-            window.sendJSON({type:"drawing", ...currentPos})
+            window.sendJSON({type:"drawing", ...currentPos});
         }
     }
 
-    handleEnd(event) {
-        event.preventDefault();
+    handleEnd() {
         this.drawing = false;
 
 		// Reset original positon
         this.last_pos = { x: -1, y: -1 };
+    }
+
+    inputEnd(event) {
+        event.preventDefault();
+
+        this.handleEnd();
+        window.sendJSON({type:"draw_end"});
     }
 
     clear() {
@@ -148,16 +163,16 @@ class Artist {
     // Enable drawing inputs
     setupInput() {
         // Touch Events
-        this.canvas.addEventListener('touchstart', this.handleStart, { passive: false });
+        this.canvas.addEventListener('touchstart', this.inputStart, { passive: false });
         this.canvas.addEventListener('touchmove', this.handleMove, { passive: false });
-        this.canvas.addEventListener('touchend', this.handleEnd);
-        this.canvas.addEventListener('touchcancel', this.handleEnd);
+        this.canvas.addEventListener('touchend', this.inputEnd);
+        this.canvas.addEventListener('touchcancel', this.inputEnd);
 
         // Mouse Events
-        this.canvas.addEventListener('mousedown', this.handleStart);
+        this.canvas.addEventListener('mousedown', this.inputStart);
         this.canvas.addEventListener('mousemove', this.handleMove);
-        this.canvas.addEventListener('mouseup', this.handleEnd);
-        this.canvas.addEventListener('mouseout', this.handleEnd);
+        this.canvas.addEventListener('mouseup', this.inputEnd);
+        this.canvas.addEventListener('mouseout', this.inputEnd);
     }
 
     // Disable drawing inputs
@@ -186,4 +201,6 @@ window.addEventListener('load', () => {
     };
 
     window.canvasTool = canvasArtist.swapTool;
+    window.canvasStart = canvasArtist.handleStart;
+    window.canvasEnd = canvasArtist.handleEnd;
 });

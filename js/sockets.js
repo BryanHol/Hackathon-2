@@ -35,9 +35,6 @@ socket.addEventListener("message", (event) => {
         const username = data.username;
         const timeStamp = data.timeStamp;
         window.showMessage(messageText, username, timeStamp);
-    } else if (data.type == "drawing"){
-        // Draw action on canvas
-        window.canvasAction(data.x, data.y);
     } else if (data.type == "tool_change"){
         // Perform tool change
         const tool = data.tool;
@@ -45,5 +42,12 @@ socket.addEventListener("message", (event) => {
         const colour = data.colour;
         window.canvasTool(tool, width, colour);
     }
+    else if (data.type == "drawing")
+        // Draw action on canvas
+        window.canvasAction(data.x, data.y);
+    else if (data.type == "draw_start")
+        window.canvasStart(data.x, data.y);
+    else if (data.type == "start_end")
+        window.canvasEnd();
 
 });
