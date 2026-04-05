@@ -1,12 +1,45 @@
+if (!window.getCollabRoomName) {
+    window.getCollabRoomName = function () {
+        return new URLSearchParams(window.location.search).get("room") || "main";
+    };
+
+    window.ensureCollabSocket = function () {
+        if (!window.collabSocket || window.collabSocket.readyState === WebSocket.CLOSED) {
+            window.collabSocket = new WebSocket("ws://127.0.0.1:8765");
+
+            window.collabSocket.addEventListener("open", () => {
+                window.collabSocket.send(JSON.stringify({
+                    type: "join_room",
+                    room: window.getCollabRoomName(),
+                    client_id: localStorage.getItem("clientId") || "",
+                    username: localStorage.getItem("savedUsername") || "Anonymous"
+                }));
+            });
+        }
+
+        return window.collabSocket;
+    };
+
+    window.sendCollabMessage = function (payload) {
+        const socket = window.ensureCollabSocket();
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(payload));
+        } else {
+            console.log("WebSocket is not open yet.");
+        }
+    };
+}
+
 class Artist {
     canvas;
     context;
 
-    tool = 0;	// 0: Brush, 1: Bucket
-    width = 5;	// Line in px
+    tool = 0; // 0: Brush, 1: Bucket
+    width = 5; // Line in px
     colour = "#000000"; // Drawing colour
 
-    actions = [];	// An array of CanvasAction objects
+    actions = []; // An array of CanvasAction objects
 
     last_pos = { x: -1, y: -1 };
     drawing = false;
@@ -16,7 +49,7 @@ class Artist {
         this.canvas = document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
 
-		// Bind functions
+        // Bind functions
         this.handleStart = this.handleStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
@@ -28,24 +61,36 @@ class Artist {
     queueAction(to_pos) {
         // Check if a previous position has been set
         if (this.last_pos.x === -1 || this.last_pos.y === -1) {
-			// Not set, set original position
+            // Not set, set original position
             this.last_pos = to_pos;
             return;
         }
 
-		// Previous position set, queue a new action
-        this.actions.push({
-            start_x: this.last_pos.x, 
-            start_y: this.last_pos.y, 
-            end_x: to_pos.x, 
-            end_y: to_pos.y
+        // Previous position set, queue a new action
+        const action = {
+            start_x: this.last_pos.x,
+            start_y: this.last_pos.y,
+            end_x: to_pos.x,
+            end_y: to_pos.y,
+            colour: this.colour,
+            width: this.width
+        };
+
+        this.actions.push(action);
+
+        // Render this action
+        this.render(action);
+
+        window.sendCollabMessage({
+            type: "canvas_stroke",
+            room: window.getCollabRoomName(),
+            client_id: localStorage.getItem("clientId") || "",
+            username: localStorage.getItem("savedUsername") || "Anonymous",
+            stroke: action
         });
 
-		// Render this action
-        this.render(this.actions[this.actions.length - 1]);
-        
-		// Upgrade original position
-        this.last_pos = to_pos; 
+        // Upgrade original position
+        this.last_pos = to_pos;
     }
 
     // Update the tool info
@@ -62,8 +107,8 @@ class Artist {
         this.context.lineJoin = "round";
         this.context.lineCap = "round";
 
-        this.context.strokeStyle = this.colour;
-        this.context.lineWidth = this.width;
+        this.context.strokeStyle = canvasAction.colour || this.colour;
+        this.context.lineWidth = canvasAction.width || this.width;
 
         this.context.moveTo(canvasAction.start_x, canvasAction.start_y);
         this.context.lineTo(canvasAction.end_x, canvasAction.end_y);
@@ -116,7 +161,7 @@ class Artist {
         event.preventDefault();
         this.drawing = false;
 
-		// Reset original positon
+        // Reset original positon
         this.last_pos = { x: -1, y: -1 };
     }
 
@@ -157,7 +202,49 @@ class Artist {
 
 window.addEventListener('load', () => {
     const canvasArtist = new Artist();
+    const socket = window.ensureCollabSocket();
+
+    socket.addEventListener("message", (event) => {
+        const payload = JSON.parse(event.data);
+
+        if (payload.type === "user_registered" && payload.user && payload.user.client_id) {
+            localStorage.setItem("clientId", payload.user.client_id);
+            return;
+        }
+
+        if (payload.type === "init_state") {
+            canvasArtist.clear();
+            canvasArtist.actions = [];
+
+            for (const storedStroke of payload.state.strokes) {
+                canvasArtist.actions.push(storedStroke.stroke);
+                canvasArtist.render(storedStroke.stroke);
+            }
+            return;
+        }
+
+        if (payload.type === "canvas_stroke") {
+            if (payload.stroke.client_id === (localStorage.getItem("clientId") || "")) {
+                return;
+            }
+
+            canvasArtist.actions.push(payload.stroke.stroke);
+            canvasArtist.render(payload.stroke.stroke);
+            return;
+        }
+
+        if (payload.type === "canvas_cleared") {
+            canvasArtist.actions = [];
+            canvasArtist.clear();
+        }
+    });
+
     document.getElementById("clear").addEventListener("click", () => {
-        canvasArtist.clear();
+        window.sendCollabMessage({
+            type: "clear_canvas",
+            room: window.getCollabRoomName(),
+            client_id: localStorage.getItem("clientId") || "",
+            username: localStorage.getItem("savedUsername") || "Anonymous"
+        });
     });
 });
