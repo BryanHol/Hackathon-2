@@ -18,6 +18,8 @@ class Artist {
 
     actions = [];	// An array of CanvasAction objects
 
+    messages = []; // An array of message objects in sequence
+
     last_pos = { x: -1, y: -1 };
     drawing = false;
 
@@ -130,7 +132,10 @@ class Artist {
         const pos = this.getCoordinates(event);
 
         this.handleStart(pos);
-        window.sendJSON({type:"draw_start", ...pos});
+
+        const json = {type:"draw_start", ...pos};
+        window.sendJSON(json);
+        this.messages.push(json)
     }
 
     handleMove(event) {
@@ -138,7 +143,10 @@ class Artist {
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
-            window.sendJSON({type:"drawing", ...currentPos});
+
+            const json = {type:"drawing", ...currentPos};
+            window.sendJSON(json);
+            this.messages.push(json);
         }
     }
 
@@ -153,7 +161,10 @@ class Artist {
         event.preventDefault();
 
         this.handleEnd();
-        window.sendJSON({type:"draw_end"});
+
+        const json = {type:"draw_end"};
+        window.sendJSON(json);
+        this.messages.push(json);
     }
 
     clear() {
@@ -191,8 +202,9 @@ class Artist {
     }
 }
 
+let canvasArtist;
 window.addEventListener('load', () => {
-    const canvasArtist = new Artist();
+    canvasArtist = new Artist();
 
     // Queue a new action from a socket event
     window.canvasAction = (to_x, to_y) => {
@@ -204,3 +216,9 @@ window.addEventListener('load', () => {
     window.canvasStart = canvasArtist.handleStart;
     window.canvasEnd = canvasArtist.handleEnd;
 });
+
+function playAllMessages() {
+    for (message of canvasArtist.messages) {
+        window.sendJSON(message);
+    }
+}
