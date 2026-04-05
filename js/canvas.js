@@ -129,6 +129,7 @@ class Artist {
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
+            window.sendJSON({type:"drawing", ...currentPos})
         }
     }
 

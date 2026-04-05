@@ -12,38 +12,38 @@ const socket = new WebSocket('ws://localhost:8000');
 
 // Connection opened
 socket.addEventListener("open", (event) => {
-    socket.send("Hello Server!");
+    
 });
 
 // Send JSON object to server
 //export function sendJSON(jsonObj) { - requires modules which requires server hosting of html
 window.sendJSON = function(jsonObj) {
-    socket.send(jsonObj);
+    // Send JSON as a string
+    socket.send(JSON.stringify(jsonObj));
 }
 
 // Listen for messages
 socket.addEventListener("message", (event) => {
     console.log("Message from server ", event.data);
 
-    if(event.data.type == "message"){
+    // Turn string from socket into a JSON object
+    const data = JSON.parse(event.data);
+
+    if(data.type == "message"){
         // Place message into DOM
-        const messageText = event.data.messageText;
-        const username = event.data.username;
-        const timeStamp = event.data.timeStamp;
+        const messageText = data.messageText;
+        const username = data.username;
+        const timeStamp = data.timeStamp;
         window.showMessage(messageText, username, timeStamp);
-    } else if (event.data.type == "drawing"){
-        window.canvasAction(event.data.x, event.data.y);
-    } else if (event.data.type == "tool_change"){
-        const tool = event.data.tool;
-        const width = event.data.width;
-        const colour = event.data.colour;
+    } else if (data.type == "drawing"){
+        // Draw action on canvas
+        window.canvasAction(data.x, data.y);
+    } else if (data.type == "tool_change"){
+        // Perform tool change
+        const tool = data.tool;
+        const width = data.width;
+        const colour = data.colour;
         window.canvasTool(tool, width, colour);
     }
 
 });
-
-function sendBlob(blob) {
-    socket.send(blob);
-}
-
-const canvasArtist = new Artist();
