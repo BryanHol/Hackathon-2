@@ -6,7 +6,7 @@ window.addEventListener('load', () => {
             const code = document.getElementById('roomCode').value.trim();
 
         if (code) {
-            // const path = "./main_page.html"; // switch this when online and not local
+            // const path = "./main_page.html"; 
             const path = "http://127.0.0.1:5000/main_page.html";
             const targetURL = `${path}?room=${encodeURIComponent(code)}`;
             window.location.href = targetURL;
