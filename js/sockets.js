@@ -29,13 +29,15 @@ socket.addEventListener("message", (event) => {
         // Place message into DOM
         const messageText = event.data.messageText;
         const username = event.data.username;
-        const time = event.data.timeStamp;
+        const timeStamp = event.data.timeStamp;
         window.showMessage(messageText, username, timeStamp);
-        //showMessage(messageText, username, timeStamp);
     } else if (event.data.type == "drawing"){
-        canvasArtist.queueAction(to_pos);
+        window.canvasAction(event.data.x, event.data.y);
     } else if (event.data.type == "tool_change"){
-        canvasArtist.tool(tool);
+        const tool = event.data.tool;
+        const width = event.data.width;
+        const colour = event.data.colour;
+        window.canvasTool(tool, width, colour);
     }
 
 });

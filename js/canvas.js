@@ -177,4 +177,12 @@ class Artist {
 
 window.addEventListener('load', () => {
     const canvasArtist = new Artist();
+
+    // Queue a new action from a socket event
+    window.canvasAction = (to_x, to_y) => {
+        const to_pos = { x: to_x, y: to_y }
+        canvasArtist.queueAction(to_pos);
+    };
+
+    window.canvasTool = canvasArtist.swapTool;
 });
