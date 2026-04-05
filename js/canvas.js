@@ -22,6 +22,9 @@ class Artist {
         this.handleEnd = this.handleEnd.bind(this);
 
         this.setupInput();
+        
+        this.swapTool(0, 5, "#000000ff");
+
         return this;
     }
 
@@ -62,6 +65,7 @@ class Artist {
         this.context.lineJoin = "round";
         this.context.lineCap = "round";
 
+        /* add tool type later */
         this.context.strokeStyle = this.colour;
         this.context.lineWidth = this.width;
 
@@ -159,5 +163,23 @@ window.addEventListener('load', () => {
     const canvasArtist = new Artist();
     document.getElementById("clear").addEventListener("click", () => {
         canvasArtist.clear();
+       
+    }); 
+    document.getElementById("paint").addEventListener("click", () => {
+        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value);
+    });
+
+    document.getElementById("eraser").addEventListener("click", () => {
+        canvasArtist.swapTool(0, canvasArtist.width, "#ffffffff");
+    });
+
+    document.getElementById("colour").addEventListener("change", () => {
+        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value); 
+    });
+
+    document.getElementById("width").addEventListener("change", () => {
+        canvasArtist.swapTool(0, document.getElementById("width").value, canvasArtist.colour);
     });
 });
+
+
