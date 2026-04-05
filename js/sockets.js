@@ -1,0 +1,53 @@
+/*
+
+    Sockets.js
+
+    Peter Ursem & David Caudron
+
+    Handle live IO from the server and pass data to the chat and canvas handlers.
+
+*/
+
+const socket = new WebSocket('ws://localhost:8000');
+
+// Connection opened
+socket.addEventListener("open", (event) => {
+    
+});
+
+// Send JSON object to server
+//export function sendJSON(jsonObj) { - requires modules which requires server hosting of html
+window.sendJSON = function(jsonObj) {
+    // Send JSON as a string
+    socket.send(JSON.stringify(jsonObj));
+}
+
+// Listen for messages
+socket.addEventListener("message", (event) => {
+    console.log("Message from server ", event.data);
+
+    // Turn string from socket into a JSON object
+    const data = JSON.parse(event.data);
+
+    if(data.type == "message"){
+        // Place message into DOM
+        const messageText = data.messageText;
+        const username = data.username;
+        const timeStamp = data.timeStamp;
+        window.showMessage(messageText, username, timeStamp);
+    } else if (data.type == "tool_change"){
+        // Perform tool change
+        const tool = data.tool;
+        const width = data.width;
+        const colour = data.colour;
+        window.canvasTool(tool, width, colour);
+    }
+    else if (data.type == "drawing")
+        // Draw action on canvas
+        window.canvasAction(data.x, data.y);
+    else if (data.type == "draw_start")
+        window.canvasStart(data.x, data.y);
+    else if (data.type == "start_end")
+        window.canvasEnd();
+
+});

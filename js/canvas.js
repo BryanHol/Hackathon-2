@@ -1,3 +1,13 @@
+/*
+
+    Canvas.js
+
+    Peter Ursem
+
+    Handle touch inputs and draw data to the canvas.
+
+*/
+
 class Artist {
     canvas;
     context;
@@ -7,6 +17,8 @@ class Artist {
     colour = "#000000"; // Drawing colour
 
     actions = [];	// An array of CanvasAction objects
+
+    messages = []; // An array of message objects in sequence
 
     last_pos = { x: -1, y: -1 };
     drawing = false;
@@ -18,8 +30,14 @@ class Artist {
 
 		// Bind functions
         this.handleStart = this.handleStart.bind(this);
+        this.inputStart = this.inputStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
+        this.inputEnd = this.inputEnd.bind(this);
+
+        document.getElementById("clear").addEventListener("click", () => {
+            this.clear();
+        });
 
         this.setupInput();
         
@@ -52,10 +70,16 @@ class Artist {
     }
 
     // Update the tool info
+    // CALL THIS TO CHANGE COLOURS AND WIDTH
     swapTool(tool, width, colour) {
-        this.tool = tool;
+        this.tool = tool; 
         this.width = width;
         this.colour = colour;
+    }
+
+    fill(at_pos) {
+        // Code to fill the area at {x, y}
+        // Ensure that this only fills unicolour areas ad respects lines
     }
 
     // Draw the path described by the given CanvasAction
@@ -101,11 +125,21 @@ class Artist {
         };
     }
 
-    handleStart(event) {
+    handleStart(pos) {
+        this.drawing = true;
+        this.last_pos = pos;
+    }
+
+    inputStart(event) {
         event.preventDefault();
 
-        this.drawing = true;
-        this.last_pos = this.getCoordinates(event);
+        const pos = this.getCoordinates(event);
+
+        this.handleStart(pos);
+
+        const json = {type:"draw_start", ...pos};
+        window.sendJSON(json);
+        this.messages.push(json)
     }
 
     handleMove(event) {
@@ -113,15 +147,28 @@ class Artist {
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
+
+            const json = {type:"drawing", ...currentPos};
+            window.sendJSON(json);
+            this.messages.push(json);
         }
     }
 
-    handleEnd(event) {
-        event.preventDefault();
+    handleEnd() {
         this.drawing = false;
 
 		// Reset original positon
         this.last_pos = { x: -1, y: -1 };
+    }
+
+    inputEnd(event) {
+        event.preventDefault();
+
+        this.handleEnd();
+
+        const json = {type:"draw_end"};
+        window.sendJSON(json);
+        this.messages.push(json);
     }
 
     clear() {
@@ -131,16 +178,16 @@ class Artist {
     // Enable drawing inputs
     setupInput() {
         // Touch Events
-        this.canvas.addEventListener('touchstart', this.handleStart, { passive: false });
+        this.canvas.addEventListener('touchstart', this.inputStart, { passive: false });
         this.canvas.addEventListener('touchmove', this.handleMove, { passive: false });
-        this.canvas.addEventListener('touchend', this.handleEnd);
-        this.canvas.addEventListener('touchcancel', this.handleEnd);
+        this.canvas.addEventListener('touchend', this.inputEnd);
+        this.canvas.addEventListener('touchcancel', this.inputEnd);
 
         // Mouse Events
-        this.canvas.addEventListener('mousedown', this.handleStart);
+        this.canvas.addEventListener('mousedown', this.inputStart);
         this.canvas.addEventListener('mousemove', this.handleMove);
-        this.canvas.addEventListener('mouseup', this.handleEnd);
-        this.canvas.addEventListener('mouseout', this.handleEnd);
+        this.canvas.addEventListener('mouseup', this.inputEnd);
+        this.canvas.addEventListener('mouseout', this.inputEnd);
     }
 
     // Disable drawing inputs
@@ -159,8 +206,20 @@ class Artist {
     }
 }
 
+let canvasArtist;
 window.addEventListener('load', () => {
-    const canvasArtist = new Artist();
+    canvasArtist = new Artist();
+
+    // Queue a new action from a socket event
+    window.canvasAction = (to_x, to_y) => {
+        const to_pos = { x: to_x, y: to_y }
+        canvasArtist.queueAction(to_pos);
+    };
+
+    window.canvasTool = canvasArtist.swapTool;
+    window.canvasStart = canvasArtist.handleStart;
+    window.canvasEnd = canvasArtist.handleEnd;
+
     document.getElementById("clear").addEventListener("click", () => {
         canvasArtist.clear();
        
@@ -182,4 +241,8 @@ window.addEventListener('load', () => {
     });
 });
 
-
+function playAllMessages() {
+    for (message of canvasArtist.messages) {
+        window.sendJSON(message);
+    }
+}

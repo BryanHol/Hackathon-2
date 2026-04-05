@@ -5,6 +5,8 @@ Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
 */
 
+//import {sendJSON} from './sockets.js'; - requires modules which requires server hosting of html
+
 // Listener wrapper to ensure page is loaded before trying to find content
 document.addEventListener("DOMContentLoaded", () => {
     const sendButton = document.getElementById("sendButton");
@@ -19,7 +21,36 @@ document.addEventListener("DOMContentLoaded", () => {
         username = savedUsername;
         updateDisplayName();
     } 
+
+    // Function to create a message JSON object
+    function createMessageJSON(messageText, username, timeStamp) {
+        const messageObject = {
+            type: "message", // could be used for server / socket routing
+            messageText: messageText,
+            username: username,
+            timeStamp: timeStamp
+            
+        };
+        return messageObject;
+    }
     
+    // Function to show message to chat history
+    //function showMessage(messageText, username, timeStamp) {
+    window.showMessage = function(messageText, username, timeStamp) {
+        // Format construct message to embed into DOM
+        const newMessage = document.createElement("div"); // create element for the message 
+        newMessage.className = "chatMessage"; // optional class for css styling
+        newMessage.innerHTML = `
+            <span class="timeStamp">${timeStamp}</span>
+            <strong>${username}:</strong>
+            <span class="text">${messageText}</span>
+        `;
+        
+        // append message as child to chatHistory container
+        chatHistory.appendChild(newMessage);
+        chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
+            
+    }
 
     // Message handling function
     function sendMessage() {
@@ -27,19 +58,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const timeStamp = getTimeStamp();
     
         if (messageText !=="") { // prevent empty message
-            const newMessage = document.createElement("div"); // create element for the message 
-            newMessage.className = "chatMessage"; // optional class for css styling
+
+            // Display message in chat history
+            showMessage(messageText, username, timeStamp);
+
+            // Create Message Object
+            const messageJSON = createMessageJSON(messageText, username, timeStamp);
             
-            // Separated message with tags for separate styling
-            newMessage.innerHTML = `
-                <span class="timeStamp">${timeStamp}</span>
-                <strong>${username}:</strong>
-                <span class="text">${messageText}</span>
-            `;
-            //newMessage.textContent = `${username}: ${messageText}`; // set text content - ** Need backtick not quotes for variable syntax like this! **
-            chatHistory.appendChild(newMessage); // append message as child to chatHistory container
-            
-            chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
+            // Send message object to server
+            //sendJSON(messageJSON);
+            window.sendJSON(messageJSON);
+
             chatInput.value = ""; // clear input box after send
         }
     }
