@@ -12,8 +12,8 @@
 				<script src="js/canvas.js"></script>
 
         
-        <link rel="stylesheet" href="textstyle.css">
-		<link rel="stylesheet" href="main_style.css">
+        <link rel="stylesheet" href="css/textstyle.css">
+		<link rel="stylesheet" href="css/main_style.css">
     </head>
     <body>
 
@@ -31,19 +31,23 @@
                     <th>
                         <button id="clear">Clear canvas?</button>
                         <label>
-                        <input type="radio" name="tool" value="paint" checked>
+                        <input type="radio" name="tool" id="paint" value="paint" checked>
                         <img src="https://tse1.mm.bing.net/th/id/OIP.VChfsjzKbSqzD3D7q65eJgHaJd?rs=1&pid=ImgDetMain&o=7&rm=3" height="50px" width="50px" alt="Paint brush">
                         </label>
 
                         <label>
-                        <input type="radio" name="tool" value="eraser">
+                        <input type="radio" name="tool" id="eraser" value="eraser">
                         <img src="https://images.freeimages.com/images/large-previews/74b/eraser-1423965.jpg" height="50px" width="50px"  alt="Eraser">
                         </label>
 
                         <label>
-                        <input type="radio" name="tool" value="bucket">
+                        <input type="radio" name="tool" id="bucket" value="bucket">
                         <img src="https://tse1.mm.bing.net/th/id/OIP.88s5T-A4_X7wsGKlApc0qgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" height="50px" width="50px"  alt="Eraser">
                         </label>
+
+                        <input type="color" name="colour" id="colour" value="#000000" height="50px" width="50px">
+                        <input type="range" name="width" id="width" value="5" min="1" max="100" height="50px" width="50px">
+                    </th>
                     </th>
                 </tr>
             </table>
