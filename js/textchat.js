@@ -5,6 +5,7 @@ Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
 */
 
+//import {sendJSON} from './sockets.js'; - requires modules which requires server hosting of html
 if (!window.getCollabRoomName) {
     window.getCollabRoomName = function () {
         return new URLSearchParams(window.location.search).get("room") || "main";
@@ -67,6 +68,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (savedUsername) {
         updateDisplayName();
+    } 
+
+    // Function to create a message JSON object
+    function createMessageJSON(messageText, username, timeStamp) {
+        const messageObject = {
+            type: "message", // could be used for server / socket routing
+            messageText: messageText,
+            username: username,
+            timeStamp: timeStamp
+            
+        };
+        return messageObject;
+    }
+    
+    // Function to show message to chat history
+    //function showMessage(messageText, username, timeStamp) {
+    window.showMessage = function(messageText, username, timeStamp) {
+        // Format construct message to embed into DOM
+        const newMessage = document.createElement("div"); // create element for the message 
+        newMessage.className = "chatMessage"; // optional class for css styling
+        newMessage.innerHTML = `
+            <span class="timeStamp">${timeStamp}</span>
+            <strong>${username}:</strong>
+            <span class="text">${messageText}</span>
+        `;
+        
+        // append message as child to chatHistory container
+        chatHistory.appendChild(newMessage);
+        chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
+            
         usernameInput.style.display = 'none';
         saveUsernameButton.style.display = 'none';
     }
@@ -108,6 +139,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Message handling function
     function sendMessage() {
         const messageText = chatInput.value.trim();
+        const timeStamp = getTimeStamp();
+    
+        if (messageText !=="") { // prevent empty message
+
+            // Display message in chat history
+            showMessage(messageText, username, timeStamp);
+
+            // Create Message Object
+            const messageJSON = createMessageJSON(messageText, username, timeStamp);
+            
+            // Send message object to server
+            //sendJSON(messageJSON);
+            window.sendJSON(messageJSON);
 
         if (messageText !== "") { // prevent empty message
             window.sendCollabMessage({
