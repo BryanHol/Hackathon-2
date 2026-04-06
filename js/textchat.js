@@ -5,56 +5,6 @@ Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
 */
 
-//import {sendJSON} from './sockets.js'; - requires modules which requires server hosting of html
-if (!window.getCollabRoomName) {
-    window.getCollabRoomName = function () {
-        return new URLSearchParams(window.location.search).get("room") || "main";
-    };
-
-    window.ensureCollabSocket = function () {
-        if (!window.collabSocket || window.collabSocket.readyState === WebSocket.CLOSED) {
-            window.collabSocket = new WebSocket("ws://127.0.0.1:8765");
-
-            window.collabSocket.addEventListener("open", () => {
-                window.collabSocket.send(JSON.stringify({
-                    type: "join_room",
-                    room: window.getCollabRoomName(),
-                    client_id: localStorage.getItem("clientId") || "",
-                    username: localStorage.getItem("savedUsername") || "Anonymous"
-                }));
-            });
-        }
-
-        return window.collabSocket;
-    };
-
-    window.sendCollabMessage = function (payload) {
-        const socket = window.ensureCollabSocket();
-
-        socket.addEventListener("open", () => {
-            console.log("WebSocket connected");
-        });
-
-socket.addEventListener("close", (event) => {
-    console.log("WebSocket closed:", event.code, event.reason);
-});
-
-socket.addEventListener("error", () => {
-    console.log("WebSocket error");
-});
-
-socket.addEventListener("message", (event) => {
-    console.log("Raw WebSocket message:", event.data);
-});
-
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(payload));
-        } else {
-            console.log("WebSocket is not open yet.");
-        }
-    };
-}
-
 // Listener wrapper to ensure page is loaded before trying to find content
 document.addEventListener("DOMContentLoaded", () => {
     const sendButton = document.getElementById("sendButton");
@@ -62,44 +12,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatInput = document.getElementById("chatInput");
     const usernameInput = document.getElementById("usernameInput");
     const saveUsernameButton = document.getElementById("saveUsernameButton");
-    const savedUsername = localStorage.getItem("savedUsername");
+    const savedUsername = sessionStorage.getItem("savedUsername");
     const socket = window.ensureCollabSocket();
     let username = savedUsername || "Anonymous";
 
     if (savedUsername) {
         updateDisplayName();
-    } 
-
-    // Function to create a message JSON object
-    function createMessageJSON(messageText, username, timeStamp) {
-        const messageObject = {
-            type: "message", // could be used for server / socket routing
-            messageText: messageText,
-            username: username,
-            timeStamp: timeStamp
-            
-        };
-        return messageObject;
-    }
-    
-    // Function to show message to chat history
-    //function showMessage(messageText, username, timeStamp) {
-    window.showMessage = function(messageText, username, timeStamp) {
-        // Format construct message to embed into DOM
-        const newMessage = document.createElement("div"); // create element for the message 
-        newMessage.className = "chatMessage"; // optional class for css styling
-        newMessage.innerHTML = `
-            <span class="timeStamp">${timeStamp}</span>
-            <strong>${username}:</strong>
-            <span class="text">${messageText}</span>
-        `;
-        
-        // append message as child to chatHistory container
-        chatHistory.appendChild(newMessage);
-        chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
-            
-        usernameInput.style.display = 'none';
-        saveUsernameButton.style.display = 'none';
+        usernameInput.style.display = "none";
+        saveUsernameButton.style.display = "none";
     }
 
     socket.addEventListener("message", (event) => {
@@ -136,24 +56,10 @@ document.addEventListener("DOMContentLoaded", () => {
         chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
-    // Message handling function
     function sendMessage() {
         const messageText = chatInput.value.trim();
-        const timeStamp = getTimeStamp();
-    
-        if (messageText !=="") { // prevent empty message
 
-            // Display message in chat history
-            showMessage(messageText, username, timeStamp);
-
-            // Create Message Object
-            const messageJSON = createMessageJSON(messageText, username, timeStamp);
-            
-            // Send message object to server
-            //sendJSON(messageJSON);
-            window.sendJSON(messageJSON);
-
-        if (messageText !== "") { // prevent empty message
+        if (messageText !== "") {
             window.sendCollabMessage({
                 type: "chat_message",
                 room: window.getCollabRoomName(),
@@ -162,20 +68,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 text: messageText
             });
 
-            chatInput.value = ""; // clear input box after send
+            chatInput.value = "";
         }
     }
 
-    // Function to save username
     function saveUsername() {
         const name = usernameInput.value.trim();
-        if (name != "") {
+
+        if (name !== "") {
             username = name;
-            localStorage.setItem("savedUsername", username);
+            sessionStorage.setItem("savedUsername", username);
             updateDisplayName();
 
-            document.getElementById("usernameInput").style.display = 'none';
-            document.getElementById("saveUsernameButton").style.display = 'none';
+            document.getElementById("usernameInput").style.display = "none";
+            document.getElementById("saveUsernameButton").style.display = "none";
 
             window.sendCollabMessage({
                 type: "set_username",
@@ -186,14 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Function to get the current time and convert it to time stamp for chat message
-    function getTimeStamp() {
-        const time = new Date();
-        const timeStamp = time.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-        return timeStamp;
-    }
-
-    // Function to update the username display
     function updateDisplayName() {
         const displayName = document.getElementById("usernameDisplay");
         let savedUsernameLabel = document.getElementById("savedUsernameLabel");
@@ -207,17 +105,16 @@ document.addEventListener("DOMContentLoaded", () => {
         savedUsernameLabel.textContent = username;
     }
 
-    // Trigger on click
     sendButton.addEventListener("click", sendMessage);
     saveUsernameButton.addEventListener("click", saveUsername);
 
-    // Trigger on enter key
     chatInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
             sendMessage();
-            chatInput.focus(); // return focus to input box after send
+            chatInput.focus();
         }
     });
+
     usernameInput.addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
             saveUsername();

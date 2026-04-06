@@ -1,141 +1,70 @@
-/*
-
-    Canvas.js
-
-    Peter Ursem
-
-    Handle touch inputs and draw data to the canvas.
-
-*/
-if (!window.getCollabRoomName) {
-    window.getCollabRoomName = function () {
-        return new URLSearchParams(window.location.search).get("room") || "main";
-    };
-
-    window.ensureCollabSocket = function () {
-        if (!window.collabSocket || window.collabSocket.readyState === WebSocket.CLOSED) {
-            window.collabSocket = new WebSocket("ws://127.0.0.1:8765");
-
-            window.collabSocket.addEventListener("open", () => {
-                window.collabSocket.send(JSON.stringify({
-                    type: "join_room",
-                    room: window.getCollabRoomName(),
-                    client_id: localStorage.getItem("clientId") || "",
-                    username: localStorage.getItem("savedUsername") || "Anonymous"
-                }));
-            });
-        }
-
-        return window.collabSocket;
-    };
-
-    window.sendCollabMessage = function (payload) {
-        const socket = window.ensureCollabSocket();
-
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(payload));
-        } else {
-            console.log("WebSocket is not open yet.");
-        }
-    };
-}
-
 class Artist {
     canvas;
     context;
 
-    tool = 0; // 0: Brush, 1: Bucket
-    width = 5; // Line in px
+    tool = 0;   // 0: Brush, 1: Bucket
+    width = 5;  // Line in px
     colour = "#000000"; // Drawing colour
 
-    actions = []; // An array of CanvasAction objects
-
-    messages = []; // An array of message objects in sequence
+    actions = [];   // An array of CanvasAction objects
 
     last_pos = { x: -1, y: -1 };
     drawing = false;
 
-    // Initialize the artist
-    constructor () {
-        this.canvas = document.getElementById('canvas');
-        this.context = this.canvas.getContext('2d');
+    constructor() {
+        this.canvas = document.getElementById("canvas");
+        this.context = this.canvas.getContext("2d");
 
-        // Bind functions
         this.handleStart = this.handleStart.bind(this);
-        this.inputStart = this.inputStart.bind(this);
         this.handleMove = this.handleMove.bind(this);
         this.handleEnd = this.handleEnd.bind(this);
-        this.inputEnd = this.inputEnd.bind(this);
-
-        document.getElementById("clear").addEventListener("click", () => {
-            this.clear();
-        });
 
         this.setupInput();
-        
-        this.swapTool(0, 5, "#000000ff");
-
         return this;
     }
 
     queueAction(to_pos) {
-        // Check if a previous position has been set
         if (this.last_pos.x === -1 || this.last_pos.y === -1) {
-            // Not set, set original position
             this.last_pos = to_pos;
             return;
         }
 
-        // Previous position set, queue a new action
         const action = {
             start_x: this.last_pos.x,
             start_y: this.last_pos.y,
             end_x: to_pos.x,
             end_y: to_pos.y,
             colour: this.colour,
-            width: this.width
+            width: this.width,
+            session_id: window.getCollabSessionId()
         };
 
         this.actions.push(action);
-
-        // Render this action
         this.render(action);
 
         window.sendCollabMessage({
             type: "canvas_stroke",
             room: window.getCollabRoomName(),
             client_id: localStorage.getItem("clientId") || "",
-            username: localStorage.getItem("savedUsername") || "Anonymous",
+            username: sessionStorage.getItem("savedUsername") || "Anonymous",
             stroke: action
         });
 
-        // Upgrade original position
         this.last_pos = to_pos;
     }
 
-    // Update the tool info
-    // CALL THIS TO CHANGE COLOURS AND WIDTH
     swapTool(tool, width, colour) {
-        this.tool = tool; 
+        this.tool = tool;
         this.width = width;
         this.colour = colour;
     }
 
-    fill(at_pos) {
-        // Code to fill the area at {x, y}
-        // Ensure that this only fills unicolour areas ad respects lines
-    }
-
-    // Draw the path described by the given CanvasAction
     render(canvasAction) {
         this.context.beginPath();
 
         this.context.lineJoin = "round";
         this.context.lineCap = "round";
 
-        /* add tool type later */
-        this.context.strokeStyle = this.colour;
-        this.context.lineWidth = this.width;
         this.context.strokeStyle = canvasAction.colour || this.colour;
         this.context.lineWidth = canvasAction.width || this.width;
 
@@ -146,21 +75,18 @@ class Artist {
         this.context.stroke();
     }
 
-    // Helper to extract relative coordinates for both mouse and touch events
     getCoordinates(event) {
         const rect = this.canvas.getBoundingClientRect();
-        let clientX, clientY;
+        let clientX;
+        let clientY;
 
         if (event.touches && event.touches.length > 0) {
-            // Handle touch event
             clientX = event.touches[0].clientX;
             clientY = event.touches[0].clientY;
         } else if (event.changedTouches && event.changedTouches.length > 0) {
-            // Handle touch updates
             clientX = event.changedTouches[0].clientX;
             clientY = event.changedTouches[0].clientY;
         } else {
-            // Handle mouse event
             clientX = event.clientX;
             clientY = event.clientY;
         }
@@ -171,109 +97,93 @@ class Artist {
         };
     }
 
-    handleStart(pos) {
-        this.drawing = true;
-        this.last_pos = pos;
-    }
-
-    inputStart(event) {
+    handleStart(event) {
         event.preventDefault();
-
-        const pos = this.getCoordinates(event);
-
-        this.handleStart(pos);
-
-        const json = {type:"draw_start", ...pos};
-        window.sendJSON(json);
-        this.messages.push(json)
+        this.drawing = true;
+        this.last_pos = this.getCoordinates(event);
     }
 
     handleMove(event) {
         event.preventDefault();
+
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
-
-            const json = {type:"drawing", ...currentPos};
-            window.sendJSON(json);
-            this.messages.push(json);
         }
     }
 
-    handleEnd() {
-        this.drawing = false;
-
-        // Reset original positon
-        this.last_pos = { x: -1, y: -1 };
-    }
-
-    inputEnd(event) {
+    handleEnd(event) {
         event.preventDefault();
-
-        this.handleEnd();
-
-        const json = {type:"draw_end"};
-        window.sendJSON(json);
-        this.messages.push(json);
+        this.drawing = false;
+        this.last_pos = { x: -1, y: -1 };
     }
 
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    // Enable drawing inputs
     setupInput() {
-        // Touch Events
-        this.canvas.addEventListener('touchstart', this.inputStart, { passive: false });
-        this.canvas.addEventListener('touchmove', this.handleMove, { passive: false });
-        this.canvas.addEventListener('touchend', this.inputEnd);
-        this.canvas.addEventListener('touchcancel', this.inputEnd);
+        this.canvas.addEventListener("touchstart", this.handleStart, { passive: false });
+        this.canvas.addEventListener("touchmove", this.handleMove, { passive: false });
+        this.canvas.addEventListener("touchend", this.handleEnd);
+        this.canvas.addEventListener("touchcancel", this.handleEnd);
 
-        // Mouse Events
-        this.canvas.addEventListener('mousedown', this.inputStart);
-        this.canvas.addEventListener('mousemove', this.handleMove);
-        this.canvas.addEventListener('mouseup', this.inputEnd);
-        this.canvas.addEventListener('mouseout', this.inputEnd);
+        this.canvas.addEventListener("mousedown", this.handleStart);
+        this.canvas.addEventListener("mousemove", this.handleMove);
+        this.canvas.addEventListener("mouseup", this.handleEnd);
+        this.canvas.addEventListener("mouseout", this.handleEnd);
     }
 
-    // Disable drawing inputs
     removeInput() {
-        // Touch Events
-        this.canvas.removeEventListener('touchstart', this.handleStart);
-        this.canvas.removeEventListener('touchmove', this.handleMove);
-        this.canvas.removeEventListener('touchend', this.handleEnd);
-        this.canvas.removeEventListener('touchcancel', this.handleEnd);
+        this.canvas.removeEventListener("touchstart", this.handleStart);
+        this.canvas.removeEventListener("touchmove", this.handleMove);
+        this.canvas.removeEventListener("touchend", this.handleEnd);
+        this.canvas.removeEventListener("touchcancel", this.handleEnd);
 
-        // Mouse Events
-        this.canvas.removeEventListener('mousedown', this.handleStart);
-        this.canvas.removeEventListener('mousemove', this.handleMove);
-        this.canvas.removeEventListener('mouseup', this.handleEnd);
-        this.canvas.removeEventListener('mouseout', this.handleEnd);
+        this.canvas.removeEventListener("mousedown", this.handleStart);
+        this.canvas.removeEventListener("mousemove", this.handleMove);
+        this.canvas.removeEventListener("mouseup", this.handleEnd);
+        this.canvas.removeEventListener("mouseout", this.handleEnd);
     }
 }
 
-let canvasArtist;
-window.addEventListener('load', () => {
-    canvasArtist = new Artist();
-
-    // Queue a new action from a socket event
-    window.canvasAction = (to_x, to_y) => {
-        const to_pos = { x: to_x, y: to_y }
-        canvasArtist.queueAction(to_pos);
-    };
-
-    window.canvasTool = canvasArtist.swapTool;
-    window.canvasStart = canvasArtist.handleStart;
-    window.canvasEnd = canvasArtist.handleEnd;
-
-    document.getElementById("clear").addEventListener("click", () => {
-        canvasArtist.clear();
-       
-    }); 
-    document.getElementById("paint").addEventListener("click", () => {
-        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value);
+window.addEventListener("load", () => {
     const canvasArtist = new Artist();
     const socket = window.ensureCollabSocket();
+    const colourInput = document.getElementById("colour");
+    const widthInput = document.getElementById("width");
+    const paintRadio = document.getElementById("paint");
+    const eraserRadio = document.getElementById("eraser");
+
+    if (colourInput) {
+        colourInput.addEventListener("input", () => {
+            if (!eraserRadio || !eraserRadio.checked) {
+                canvasArtist.colour = colourInput.value;
+            }
+        });
+    }
+
+    if (widthInput) {
+        widthInput.addEventListener("input", () => {
+            canvasArtist.width = Number(widthInput.value);
+        });
+    }
+
+    if (paintRadio) {
+        paintRadio.addEventListener("change", () => {
+            if (paintRadio.checked) {
+                canvasArtist.colour = colourInput ? colourInput.value : "#000000";
+            }
+        });
+    }
+
+    if (eraserRadio) {
+        eraserRadio.addEventListener("change", () => {
+            if (eraserRadio.checked) {
+                canvasArtist.colour = "#FFFFFF";
+            }
+        });
+    }
 
     socket.addEventListener("message", (event) => {
         const payload = JSON.parse(event.data);
@@ -288,19 +198,29 @@ window.addEventListener('load', () => {
             canvasArtist.actions = [];
 
             for (const storedStroke of payload.state.strokes) {
-                canvasArtist.actions.push(storedStroke.stroke);
-                canvasArtist.render(storedStroke.stroke);
+                if (storedStroke.stroke) {
+                    canvasArtist.actions.push(storedStroke.stroke);
+                    canvasArtist.render(storedStroke.stroke);
+                }
             }
             return;
         }
 
         if (payload.type === "canvas_stroke") {
-            if (payload.stroke.client_id === (localStorage.getItem("clientId") || "")) {
+            const incomingStroke = payload.stroke && payload.stroke.stroke
+                ? payload.stroke.stroke
+                : null;
+
+            if (!incomingStroke) {
                 return;
             }
 
-            canvasArtist.actions.push(payload.stroke.stroke);
-            canvasArtist.render(payload.stroke.stroke);
+            if (incomingStroke.session_id === window.getCollabSessionId()) {
+                return;
+            }
+
+            canvasArtist.actions.push(incomingStroke);
+            canvasArtist.render(incomingStroke);
             return;
         }
 
@@ -315,25 +235,7 @@ window.addEventListener('load', () => {
             type: "clear_canvas",
             room: window.getCollabRoomName(),
             client_id: localStorage.getItem("clientId") || "",
-            username: localStorage.getItem("savedUsername") || "Anonymous"
+            username: sessionStorage.getItem("savedUsername") || "Anonymous"
         });
     });
-
-    document.getElementById("eraser").addEventListener("click", () => {
-        canvasArtist.swapTool(0, canvasArtist.width, "#ffffffff");
-    });
-
-    document.getElementById("colour").addEventListener("change", () => {
-        canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value); 
-    });
-
-    document.getElementById("width").addEventListener("change", () => {
-        canvasArtist.swapTool(0, document.getElementById("width").value, canvasArtist.colour);
-    });
 });
-
-function playAllMessages() {
-    for (message of canvasArtist.messages) {
-        window.sendJSON(message);
-    }
-}

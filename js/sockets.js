@@ -8,46 +8,53 @@
 
 */
 
-const socket = new WebSocket('ws://localhost:8000');
+window.getCollabRoomName = function () {
+    return new URLSearchParams(window.location.search).get("room") || "main";
+};
 
-// Connection opened
-socket.addEventListener("open", (event) => {
-    
-});
+window.getCollabSessionId = function () {
+    let sessionId = sessionStorage.getItem("collabSessionId");
 
-// Send JSON object to server
-//export function sendJSON(jsonObj) { - requires modules which requires server hosting of html
-window.sendJSON = function(jsonObj) {
-    // Send JSON as a string
-    socket.send(JSON.stringify(jsonObj));
-}
+    if (!sessionId) {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+            sessionId = window.crypto.randomUUID();
+        } else {
+            sessionId = "session-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+        }
 
-// Listen for messages
-socket.addEventListener("message", (event) => {
-    console.log("Message from server ", event.data);
-
-    // Turn string from socket into a JSON object
-    const data = JSON.parse(event.data);
-
-    if(data.type == "message"){
-        // Place message into DOM
-        const messageText = data.messageText;
-        const username = data.username;
-        const timeStamp = data.timeStamp;
-        window.showMessage(messageText, username, timeStamp);
-    } else if (data.type == "tool_change"){
-        // Perform tool change
-        const tool = data.tool;
-        const width = data.width;
-        const colour = data.colour;
-        window.canvasTool(tool, width, colour);
+        sessionStorage.setItem("collabSessionId", sessionId);
     }
-    else if (data.type == "drawing")
-        // Draw action on canvas
-        window.canvasAction(data.x, data.y);
-    else if (data.type == "draw_start")
-        window.canvasStart(data.x, data.y);
-    else if (data.type == "start_end")
-        window.canvasEnd();
 
-});
+    return sessionId;
+};
+
+window.ensureCollabSocket = function () {
+    if (
+        !window.collabSocket ||
+        window.collabSocket.readyState === WebSocket.CLOSED ||
+        window.collabSocket.readyState === WebSocket.CLOSING
+    ) {
+        window.collabSocket = new WebSocket("ws://127.0.0.1:8765");
+
+        window.collabSocket.addEventListener("open", () => {
+            window.collabSocket.send(JSON.stringify({
+                type: "join_room",
+                room: window.getCollabRoomName(),
+                client_id: localStorage.getItem("clientId") || "",
+                username: sessionStorage.getItem("savedUsername") || "Anonymous"
+            }));
+        });
+    }
+
+    return window.collabSocket;
+};
+
+window.sendCollabMessage = function (jsonObj) {
+    const socket = window.ensureCollabSocket();
+
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(jsonObj));
+    } else {
+        console.log("WebSocket is not open yet.");
+    }
+};
