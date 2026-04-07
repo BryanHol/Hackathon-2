@@ -63,7 +63,7 @@ socket.addEventListener("message", (event) => {
         window.canvasAction(data.x, data.y);
     else if (data.type == "draw_start")
         window.canvasStart(data.x, data.y);
-    else if (data.type == "start_end")
+    else if (data.type == "draw_end")
         window.canvasEnd();
 
 });

@@ -137,7 +137,7 @@ class Artist {
 
         this.handleStart(pos);
 
-        const json = {type:"draw_start", ...pos};
+        const json = { type:"draw_start", ...pos };
         window.sendJSON(json);
         this.messages.push(json)
     }
@@ -148,7 +148,7 @@ class Artist {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos);
 
-            const json = {type:"drawing", ...currentPos};
+            const json = { type:"drawing", ...currentPos };
             window.sendJSON(json);
             this.messages.push(json);
         }
@@ -166,7 +166,7 @@ class Artist {
 
         this.handleEnd();
 
-        const json = {type:"draw_end"};
+        const json = { type:"draw_end" };
         window.sendJSON(json);
         this.messages.push(json);
     }
