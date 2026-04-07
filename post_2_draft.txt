@@ -13,6 +13,7 @@ as well as a server that only ran on curl commands. In Sprint 2:
 - the app supports late joiners, by updating their view based on what is on the server
 - improved UI interface for a more comfortable viewing experience
 - username handling and room entry is through the browser
+- began process of adding teams should-have feature - basic functionality to join teams and style chat messages based on teams added 
 
 Requirements Progress Update:
 From Sprint 1, we have now fulfilled the following functional requirements:
@@ -33,3 +34,4 @@ Technical challenges:
   how they worked, and how to implement them both server side and on the .js side.
 - Old and new protocols for connections needed to be completely reworked to properly incorporate websocket connections
 - Canvas synchronization and adjustment of tooling was not straightforward
+- Adding teams functionality is fairly complex and requires a number of components and integration into multiple modules (chat, canvas, web sockets, server)
