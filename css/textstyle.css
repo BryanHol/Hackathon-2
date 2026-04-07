@@ -1,0 +1,115 @@
+#chatHistory {
+    flex: 1;
+    min-height: 320px;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 22px;
+    background:
+        linear-gradient(180deg, rgba(253, 255, 255, 0.92), rgba(237, 247, 255, 0.9)),
+        linear-gradient(180deg, rgba(61, 125, 199, 0.03), rgba(61, 125, 199, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    box-shadow: inset 0 1px 10px rgba(28, 67, 122, 0.07);
+}
+
+.chat-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 100%;
+}
+
+.chatMessage {
+    max-width: 92%;
+    padding: 12px 14px;
+    border-radius: 18px 18px 18px 8px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(190, 218, 255, 0.72);
+    box-shadow: 0 10px 16px rgba(21, 56, 110, 0.08);
+    color: #173253;
+    line-height: 1.45;
+}
+
+.chatMessage .timeStamp {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: rgba(23, 50, 83, 0.5);
+}
+
+.chatMessage strong {
+    color: #1f5ec3;
+    margin-right: 6px;
+}
+
+#usernameDisplay {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+}
+
+#usernameInput,
+#chatInput {
+    width: 100%;
+    border: 1px solid rgba(165, 201, 255, 0.9);
+    border-radius: 999px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #143055;
+    font: inherit;
+    box-shadow: inset 0 2px 8px rgba(31, 77, 146, 0.06);
+}
+
+#usernameInput:focus,
+#chatInput:focus {
+    outline: 2px solid rgba(45, 132, 255, 0.35);
+    border-color: rgba(45, 132, 255, 0.65);
+}
+
+#savedUsernameLabel {
+    margin-left: auto;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(181, 214, 255, 0.75);
+    color: #1857ba;
+    font-weight: 800;
+}
+
+#writeBox {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+}
+
+#sendButton {
+    min-width: 112px;
+}
+
+@media (max-width: 640px) {
+    #usernameDisplay,
+    #writeBox {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    #savedUsernameLabel {
+        margin-left: 0;
+    }
+
+    #sendButton,
+    #saveUsernameButton {
+        width: 100%;
+    }
+}

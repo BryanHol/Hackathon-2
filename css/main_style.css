@@ -1,0 +1,370 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+    --sky-top: #dff5ff;
+    --sky-mid: #8ac7ff;
+    --sky-bottom: #3d7dc7;
+    --panel-bg: rgba(248, 252, 255, 0.16);
+    --panel-border: rgba(255, 255, 255, 0.28);
+    --snow: #f8fcff;
+    --ink: #143055;
+    --muted-ink: rgba(20, 48, 85, 0.72);
+    --accent: #2d84ff;
+    --accent-deep: #1658c7;
+    --accent-soft: rgba(45, 132, 255, 0.16);
+    --shadow: 0 24px 45px rgba(13, 39, 77, 0.24);
+    --radius-xl: 28px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 32px;
+    position: relative;
+    overflow-x: hidden;
+    font-family: 'Nunito', Arial, sans-serif;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.62) 0, rgba(255, 255, 255, 0) 25%),
+        radial-gradient(circle at 84% 12%, rgba(255, 255, 255, 0.35) 0, rgba(255, 255, 255, 0) 16%),
+        linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 42%, var(--sky-bottom) 100%);
+}
+
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+body::before {
+    height: 42vh;
+    background: linear-gradient(180deg, rgba(221, 242, 255, 0.12) 0%, rgba(19, 69, 120, 0.45) 100%);
+    clip-path: polygon(0 100%, 0 48%, 8% 54%, 17% 30%, 26% 52%, 34% 36%, 45% 62%, 54% 42%, 65% 70%, 74% 34%, 84% 58%, 93% 40%, 100% 56%, 100% 100%);
+    opacity: 0.82;
+}
+
+body::after {
+    height: 32vh;
+    background: linear-gradient(180deg, rgba(244, 251, 255, 0.12) 0%, rgba(9, 40, 78, 0.52) 100%);
+    clip-path: polygon(0 100%, 0 70%, 12% 56%, 26% 72%, 34% 46%, 46% 80%, 61% 52%, 73% 74%, 87% 44%, 100% 68%, 100% 100%);
+    opacity: 0.75;
+}
+
+main-container {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 24px;
+    width: min(1400px, 100%);
+    min-height: calc(100vh - 64px);
+    margin: 0 auto;
+}
+
+header,
+canvas-box,
+chat-box {
+    position: relative;
+}
+
+header {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 12px 16px 4px;
+}
+
+h1 {
+    margin: 0;
+    font-family: 'Pacifico', 'Brush Script MT', cursive;
+    font-size: clamp(3rem, 6vw, 5.2rem);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+    text-shadow: 0 6px 18px rgba(26, 71, 140, 0.36);
+}
+
+.subtitle {
+    margin: 10px auto 0;
+    max-width: 560px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(245, 251, 255, 0.92);
+}
+
+canvas-box,
+chat-box {
+    display: block;
+}
+
+.canvas-shell,
+.chat-shell {
+    height: 100%;
+    padding: 22px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.canvas-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 249, 255, 0.94)),
+        linear-gradient(90deg, rgba(66, 135, 245, 0.05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(66, 135, 245, 0.05) 1px, transparent 1px);
+    background-size: auto, 32px 32px, 32px 32px;
+    border: 2px solid rgba(255, 255, 255, 0.56);
+    border-radius: 24px;
+    box-shadow: inset 0 2px 12px rgba(48, 88, 150, 0.08);
+}
+
+.tool-panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: stretch;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 24px;
+    background: rgba(240, 248, 255, 0.52);
+    border: 1px solid rgba(255, 255, 255, 0.44);
+}
+
+.pill-button,
+#sendButton,
+#saveUsernameButton {
+    border: none;
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-family: inherit;
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+    box-shadow: 0 12px 22px rgba(22, 88, 199, 0.24);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.pill-button:hover,
+#sendButton:hover,
+#saveUsernameButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 24px rgba(22, 88, 199, 0.28);
+    filter: brightness(1.04);
+}
+
+.clear-button {
+    min-width: 165px;
+}
+
+.tool-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.tool-button {
+    display: inline-flex;
+}
+
+.tool-button input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+}
+
+.tool-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 132px;
+    padding: 12px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 10px 18px rgba(27, 62, 117, 0.09);
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.tool-button input[type="radio"]:checked + .tool-card {
+    background: linear-gradient(135deg, rgba(45, 132, 255, 0.16), rgba(255, 255, 255, 0.88));
+    border-color: rgba(29, 97, 198, 0.35);
+    box-shadow: 0 14px 24px rgba(27, 76, 146, 0.16);
+    transform: translateY(-1px);
+}
+
+.tool-card:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.tool-icon {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba(33, 122, 245, 0.14), rgba(255, 255, 255, 0.96));
+    color: var(--accent-deep);
+}
+
+.tool-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 3.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tool-label {
+    font-weight: 800;
+    color: var(--ink);
+}
+
+.adjustment-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.adjustment {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 126px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.66);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    border-radius: 18px;
+    color: var(--ink);
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.adjustment input[type="color"] {
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.adjustment input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.adjustment input[type="color"]::-webkit-color-swatch,
+.adjustment input[type="color"]::-moz-color-swatch {
+    border: 2px solid rgba(255, 255, 255, 0.84);
+    border-radius: 14px;
+}
+
+.slider-adjustment {
+    min-width: 185px;
+}
+
+.adjustment input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+}
+
+.glass-strip {
+    background: rgba(255, 255, 255, 0.46);
+    border: 1px solid rgba(255, 255, 255, 0.44);
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 1100px) {
+    body {
+        padding: 20px;
+    }
+
+    main-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+
+    header {
+        grid-column: 1;
+    }
+
+    .tool-panel {
+        justify-content: center;
+    }
+
+    .adjustment-group {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 14px;
+    }
+
+    .canvas-shell,
+    .chat-shell {
+        padding: 16px;
+        border-radius: 22px;
+    }
+
+    .tool-group,
+    .adjustment-group {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tool-card {
+        min-width: 112px;
+    }
+
+    .pill-button,
+    #sendButton,
+    #saveUsernameButton {
+        width: 100%;
+        justify-content: center;
+    }
+}

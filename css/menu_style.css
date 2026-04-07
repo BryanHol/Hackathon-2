@@ -1,0 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@600;700;800&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Nunito', Arial, sans-serif;
+    background:
+        radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.58) 0, rgba(255, 255, 255, 0) 22%),
+        linear-gradient(180deg, #dff5ff 0%, #8ac7ff 44%, #3d7dc7 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+body::before,
+body::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+body::before {
+    height: 38vh;
+    background: linear-gradient(180deg, rgba(240, 249, 255, 0.14), rgba(20, 65, 122, 0.48));
+    clip-path: polygon(0 100%, 0 55%, 12% 62%, 22% 38%, 34% 68%, 45% 40%, 58% 72%, 70% 44%, 82% 66%, 92% 48%, 100% 62%, 100% 100%);
+}
+
+body::after {
+    height: 26vh;
+    background: linear-gradient(180deg, rgba(248, 253, 255, 0.14), rgba(12, 41, 78, 0.54));
+    clip-path: polygon(0 100%, 0 72%, 14% 58%, 30% 76%, 46% 48%, 63% 78%, 80% 54%, 100% 70%, 100% 100%);
+}
+
+#roomForm {
+    position: relative;
+    z-index: 1;
+    width: min(92vw, 520px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 34px 28px;
+    background: rgba(248, 252, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: 30px;
+    box-shadow: 0 24px 45px rgba(13, 39, 77, 0.24);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+#roomForm::before {
+    content: 'Drawing Together';
+    margin-bottom: 8px;
+    text-align: center;
+    font-family: 'Pacifico', 'Brush Script MT', cursive;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    color: #ffffff;
+    text-shadow: 0 6px 18px rgba(26, 71, 140, 0.36);
+}
+
+label {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    color: rgba(248, 252, 255, 0.94);
+}
+
+input,
+button {
+    border: none;
+    border-radius: 999px;
+    padding: 16px 18px;
+    font: inherit;
+}
+
+input {
+    background: rgba(255, 255, 255, 0.92);
+    color: #143055;
+    box-shadow: inset 0 2px 8px rgba(31, 77, 146, 0.06);
+}
+
+button {
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2d84ff 0%, #1658c7 100%);
+    box-shadow: 0 12px 22px rgba(22, 88, 199, 0.24);
+    cursor: pointer;
+}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Collaborative Drawing</title>
+        <meta name="keywords" content="Collaborative, Drawing, Canvas, Chat">
+        <meta name="author" content="Andrea, Bryan, Donald, Peter">
+        <meta name="description" content="Draw together with a team">
+
+        <script src="js/sockets.js"></script>
+        <script src="js/textchat.js"></script>
+        <script src="js/canvas.js"></script>
+
+        <link rel="stylesheet" href="css/textstyle.css">
+        <link rel="stylesheet" href="css/main_style.css">
+    </head>
+    <body>
+        <main-container>
+            <header>
+                <h1>Drawing Together</h1>
+                <p class="subtitle">Sketch, chat, and share ideas in your room.</p>
+            </header>
+
+            <canvas-box>
+                <section class="canvas-shell">
+                    <canvas id="canvas" width="800" height="600"></canvas>
+
+                    <div class="tool-panel">
+                        <button id="clear" class="pill-button clear-button" type="button">Clear Canvas</button>
+
+                        <div class="tool-group" aria-label="Drawing tools">
+                            <label class="tool-button" for="paint">
+                                <input type="radio" name="tool" id="paint" value="paint" checked>
+                                <span class="tool-card">
+                                    <span class="tool-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" role="presentation">
+                                            <path d="M42 10l12 12-24 24-14 4 4-14 22-22z"></path>
+                                            <path d="M37 15l12 12"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="tool-label">Paint</span>
+                                </span>
+                            </label>
+
+                            <label class="tool-button" for="eraser">
+                                <input type="radio" name="tool" id="eraser" value="eraser">
+                                <span class="tool-card">
+                                    <span class="tool-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" role="presentation">
+                                            <path d="M20 18l10-10c3-3 8-3 11 0l15 15c3 3 3 8 0 11L39 51H22L8 37c-3-3-3-8 0-11l12-8z"></path>
+                                            <path d="M23 51h26"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="tool-label">Eraser</span>
+                                </span>
+                            </label>
+
+                            <label class="tool-button" for="bucket">
+                                <input type="radio" name="tool" id="bucket" value="bucket">
+                                <span class="tool-card">
+                                    <span class="tool-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" role="presentation">
+                                            <path d="M18 18l20 20"></path>
+                                            <path d="M34 12l12 12-18 18-12-12 18-18z"></path>
+                                            <path d="M45 38c6 0 11 5 11 11 0 4-3 7-7 7-5 0-8-4-8-8 0-3 2-6 4-10z"></path>
+                                        </svg>
+                                    </span>
+                                    <span class="tool-label">Bucket</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="adjustment-group">
+                            <label class="adjustment" for="colour">
+                                <span>Colour</span>
+                                <input type="color" name="colour" id="colour" value="#1b5cff">
+                            </label>
+
+                            <label class="adjustment slider-adjustment" for="width">
+                                <span>Brush Size</span>
+                                <input type="range" name="width" id="width" value="5" min="1" max="100">
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </canvas-box>
+
+            <chat-box>
+                <section class="chat-shell">
+                    <div id="usernameDisplay" class="glass-strip">
+                        <input type="text" id="usernameInput" autocomplete="off" placeholder="Enter your username">
+                        <button id="saveUsernameButton" type="button">Save</button>
+                    </div>
+
+                    <div id="chatHistory"></div>
+
+                    <div id="writeBox">
+                        <input type="text" id="chatInput" autocomplete="off" placeholder="Type a message...">
+                        <button id="sendButton" type="button">Send</button>
+                    </div>
+                </section>
+            </chat-box>
+        </main-container>
+    </body>
+</html>
