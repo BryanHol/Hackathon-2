@@ -216,6 +216,7 @@ window.addEventListener('load', () => {
         canvasArtist.queueAction(to_pos);
     };
 
+    window.canvasClear = canvasArtist.clear;
     window.canvasStart = canvasArtist.handleStart;
     window.canvasEnd = canvasArtist.handleEnd;
     window.canvasColour = (colour) => {canvasArtist.swapTool(canvasArtist.tool, canvasArtist.width, colour)};

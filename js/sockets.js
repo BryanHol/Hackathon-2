@@ -52,10 +52,12 @@ socket.addEventListener("message", (event) => {
         const timeStamp = data.timeStamp;
         window.showMessage(messageText, username, timeStamp);
     } 
+    else if (data.type == "draw_clear")
+        window.canvasClear();
     else if (data.type == "draw_colour") 
         window.canvasColour(data.colour);
     else if (data.type == "draw_width")
-        window.canvasWidth(data.width)
+        window.canvasWidth(data.width);
     else if (data.type == "drawing")
         window.canvasAction(data.x, data.y);
     else if (data.type == "draw_start")
