@@ -1,0 +1,35 @@
+Team Name: Hack-and-Slash
+
+Team Members: Bryan Holl, David Caudron, Peter Ursem, Andrea Restrepo
+
+Feature Development Progress:
+The second sprint moved the project from a local prototype into a working collaborative web app. Sprint 1 only really had localized drawing and chat, 
+as well as a server that only ran on curl commands. In Sprint 2:
+- web-based communication now works and is fully functional
+- live text chat has been integrated into the shared rooms
+- the canvas updates live with collaborative drawing
+- room support now exists, meaning that different users can enter different rooms and get access to different server information
+- multiple users can now join a single room and see a shared canvas and text chat
+- the app supports late joiners, by updating their view based on what is on the server
+- improved UI interface for a more comfortable viewing experience
+- username handling and room entry is through the browser
+
+Requirements Progress Update:
+From Sprint 1, we have now fulfilled the following functional requirements:
+- multi-user communication is now supported through both the chat and the canvas
+- the shared canvas updates and contains more customization (more tools that can be used)
+
+From Sprint 1, we now have the following non-functional requirements:
+- The system now allows users to connect seamlessly
+- UX is now significantly more readable and easier to navigate
+- there is very little delay in drawing to the screen and it displaying to all users
+
+New requirements added:
+No new significant requirements were added, though we have refined some of our initial ideas. For example, tooling was improved with brush stroke length, chat UI was made more
+easier to use, and websocket connections were adjusted based on what worked the best.
+
+Technical challenges:
+- Working with websockets was extremely novel for most of the people on our team, meaning we needed to spend a significant amount of time learning how to use them,
+  how they worked, and how to implement them both server side and on the .js side.
+- Old and new protocols for connections needed to be completely reworked to properly incorporate websocket connections
+- Canvas synchronization and adjustment of tooling was not straightforward
