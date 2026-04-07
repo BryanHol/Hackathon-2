@@ -8,11 +8,11 @@
 
 */
 
-const socket = new WebSocket('ws://localhost:8000');
+const socket = new WebSocket('ws://'+window.location.hostname+':8000');
 
 // Connection opened
 socket.addEventListener("open", (event) => {
-    
+    // If we need to send UUID or "join_room", we can do that here
 });
 
 // Construct and send JSON packet to server
