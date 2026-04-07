@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         
         // Send join request to server
-        sendPacket("joinTeam", joinData);
+        sendPacket("join_team", joinData);
 
         // Hide buttons once team joined
         const buttons = document.getElementsByClassName("teamButton"); 
