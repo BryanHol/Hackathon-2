@@ -1,5 +1,6 @@
 /*
 Author: David Caudron
+Team Members: Peter Ursem, Bryan Holl, Andrea Restrepo
 Purpose: Basic text chat functionality
 Instructor: FUCK YOU KIDNEY!
 Filename: textchat.js
@@ -15,15 +16,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const usernameInput = document.getElementById("usernameInput");
     const saveUsernameButton = document.getElementById("saveUsernameButton");
     const savedUsername = localStorage.getItem("savedUsername");
-    let username;
+    //let username;
+    
+    // Message object
+    window.message = class {
+        constructor(text) {
+            this.sender = window.user.username;
+            this.team = window.user.team;
+            this.text = text;
+            this.timeStamp = getTimeStamp();
+        }       
+    };
+
 
     if (savedUsername) {
-        username = savedUsername;
+        //username = savedUsername;
+        window.user.username = savedUsername;
         updateDisplayName();
     } 
 
     // Function to create a message JSON object
-    function createMessageJSON(messageText, username, timeStamp) {
+    /*function createMessageJSON(messageText, username, timeStamp) {
         const messageObject = {
             type: "message", // could be used for server / socket routing
             messageText: messageText,
@@ -32,42 +45,58 @@ document.addEventListener("DOMContentLoaded", () => {
             
         };
         return messageObject;
-    }
+    }*/
     
     // Function to show message to chat history
     //function showMessage(messageText, username, timeStamp) {
-    window.showMessage = function(messageText, username, timeStamp) {
+    //window.showMessage = function(messageText, username, timeStamp) {
+    window.showMessage = function(message) {
         // Format construct message to embed into DOM
-        const newMessage = document.createElement("div"); // create element for the message 
-        newMessage.className = "chatMessage"; // optional class for css styling
-        newMessage.innerHTML = `
-            <span class="timeStamp">${timeStamp}</span>
-            <strong>${username}:</strong>
-            <span class="text">${messageText}</span>
+        const messageElement = document.createElement("div"); // create element for the message 
+        messageElement.classList.add("chatMessage"); // base class for css styling
+        
+        // Additional styling if user is the owner of the message or part of a team
+        if (message.sender == window.user.username) {
+            messageElement.classList.add('messageOwner');
+        }
+        if (message.team) {
+            messageElement.classList.add(`messageTeam-${message.team}`);
+        }
+        
+        // Construct element
+        messageElement.innerHTML = `
+            <span class="timeStamp">${message.timeStamp}</span>
+            <strong>${message.sender}:</strong>
+            <span class="text">${message.text}</span>
         `;
         
-        // append message as child to chatHistory container
-        chatHistory.appendChild(newMessage);
+        // append message element as child to chatHistory container
+        chatHistory.appendChild(messageElement);
         chatHistory.scrollTop = history.scrollHeight; // auto-scroll to bottom so messge visible
             
     }
 
     // Message handling function
     function sendMessage() {
-        const messageText = chatInput.value.trim();
-        const timeStamp = getTimeStamp();
+        const text = chatInput.value.trim();
+        //const timeStamp = getTimeStamp();
     
-        if (messageText !=="") { // prevent empty message
-
-            // Display message in chat history
-            showMessage(messageText, username, timeStamp);
+        if (text !== "") { // prevent empty message
 
             // Create Message Object
-            const messageJSON = createMessageJSON(messageText, username, timeStamp);
-            
+            //const messageJSON = createMessageJSON(messageText, username, timeStamp);
+            //const messageJSON = createMessageJSON(messageText, window.user.username, timeStamp);
+            const message = new window.message(text);
+
+            // Display message in chat history
+            //showMessage(messageText, username, timeStamp);
+            //showMessage(messageText, window.user.username, timeStamp);
+            showMessage(message);
+
+
             // Send message object to server
             //sendJSON(messageJSON);
-            window.sendJSON(messageJSON);
+            window.sendPacket("messaage", message);
 
             chatInput.value = ""; // clear input box after send
         }
@@ -77,14 +106,17 @@ document.addEventListener("DOMContentLoaded", () => {
     function saveUsername() {
         const name = usernameInput.value.trim();
         if (name != "") {
-            username = name;
-            localStorage.setItem("savedUsername", username);
+            //username = name;
+            window.user.username = name;
+            //localStorage.setItem("savedUsername", username);
+            localStorage.setItem("savedUsername", name);
             updateDisplayName();
 
             //alert("Username set to: " + username); // optionally alert for user
             document.getElementById("usernameInput").style.display = 'none'; // optionally hide username input once saved
             document.getElementById("saveUsernameButton").style.display = 'none'; // optionally hide username save button once saved
-      
+            
+            console.log("Username saved as:", window.user.username);
         }
     }
 
@@ -98,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Function to update the username display
     function updateDisplayName() {
             const displayName = document.getElementById("usernameDisplay");
-            displayName.textContent = username;
+            //displayName.textContent = username;
+            displayName.textContent = window.user.username;
     }
 
     // Trigger on click

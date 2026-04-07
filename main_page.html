@@ -7,9 +7,11 @@
         <meta name="author" content="Andrea, Bryan, Donald, Peter">
         <meta name="description" content="Draw together with a team">
 
-                <script src="js/sockets.js"></script>
-				<script src="js/textchat.js"></script>
-				<script src="js/canvas.js"></script>
+            <script src="js/user.js"></script>    
+            <script src="js/sockets.js"></script>
+			<script src="js/textchat.js"></script>
+			<script src="js/canvas.js"></script>
+            <script src="js/teams.js"></script>
 
         
         <link rel="stylesheet" href="css/textstyle.css">
@@ -64,12 +66,19 @@
  		   <div id="writeBox">
   		      <input type="text" id="chatInput" autocomplete="off" placeholder="Type a message...">
  		       <button id="sendButton">Send</button>
-	    </div>
+	        </div>
 
-				</chat-box>
+		</chat-box>
 
+        <team-box>
+            <header>
+            <div id="teamNameDisplay"></div>
+            </header>
+            <button id=joinTeamRed class="teamButton" onclick="joinTeam('Red')">Join Red Team</button>
+            <button id=joinTeamBlue class="teamButton" onclick="joinTeam('Blue')">Join Blue Team</button>
+        </team-box>
 
-				</main-container>
+		</main-container>
 
     </body>
 </html>
