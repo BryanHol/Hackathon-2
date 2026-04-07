@@ -1,23 +1,8 @@
-/*
-Author: David Caudron
-Team Members: Peter Ursem, Bryan Holl, Andrea Restrepo
-Purpose: Styling for basic text chat
-Instructor: FUCK YOU KIDNEY!
-Filename: textstyle.css
-*/
-
-
-/* Chat History Styling */
 #chatHistory {
-    background-color: #f9f9f9;
-    /*
-    width: 300px;
-    */
-
-    height:85%;
-    border: 2px solid #333;
-    padding: 10px;
-    overflow-y: auto; /* Adds the scrollbar when needed */
+    flex: 1;
+    min-height: 320px;
+    padding: 16px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -95,31 +80,6 @@ Filename: textstyle.css
     border: 1px solid rgba(181, 214, 255, 0.75);
     color: #1857ba;
     font-weight: 800;
-}
-
-/* Default Chat Message Styling */
-.chatMessage {
-    border-left-style: solid;
-    border-left-width: 5px;
-    padding: 10px;
-    margin-bottom: 8px;
-    background-color: #f1f1f1;
-    border-radius: 4px;
-}
-/* Owner and Team Styling Overrides */
-.chatMessage.messageOwner {
-    border-left-color: #008000;
-    background: #def8e3
-}
-.messageTeam-Red {
-    border-left-color: #ff4d4d;
-    background: #fff0f0;
-}
-
-.messageTeam-Blue {
-    border-left-color: #4da6ff;
-    background: #f0f8ff;
-
 }
 
 #writeBox {
