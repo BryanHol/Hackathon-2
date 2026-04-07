@@ -7,10 +7,20 @@
         <link rel="stylesheet" href="css/menu_style.css">
     </head>
     <body>
-        <form id="roomForm">
-            <label for="roomCode">Enter Room Code:</label>
-            <input type="text" id="roomCode" name="roomCode" required pattern="[A-Za-z0-9]{6,16}">
-            <button type="submit">Join Room</button>
-        </form>
+        <div class="menu-container">
+            <div class="menu-card">
+                <h1 class="menu-title">Main Menu</h1>
+
+                <div class="room-code-section">
+                    <form id="roomForm">
+                        <label for="roomCode">Enter Room Code:</label>
+                        <input type="text" class="room-code-input" id="roomCode" name="roomCode" required pattern="[A-Za-z0-9]{6,16}">
+                        <button type="submit" class="join-button">Join Room</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        
     </body>
 </html>

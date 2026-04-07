@@ -1,7 +1,7 @@
 	
 body {
 	margin:0.5% 2.5%;
-	background-image: url(https://logodix.com/logo/1983595.png);
+	background: radial-gradient(yellow,orangered);
 	background-repeat: no-repeat;
 	background-size: cover;
 }
@@ -10,7 +10,7 @@ main-container {
 	display: grid;
 	grid-template-rows: 12% 75% 13%;
 	grid-template-columns: 3fr 2fr;
-	background-color:rgb(77, 77, 77);
+	background: radial-gradient(rgb(150, 150, 150),rgb(0, 0, 0));
 	border-radius: 15px;
 }
 
@@ -21,7 +21,7 @@ canvas-box {
 
 canvas {
 	background-color: white;
-	margin: 0.5% 3.5%;
+	margin: 1.5% 3%;
 	border-radius: 15px;
 }
 
