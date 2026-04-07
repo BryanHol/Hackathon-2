@@ -46,7 +46,7 @@ class Artist {
         return this;
     }
 
-    queueAction(to_pos) {
+    queueAction(to_pos, width, colour) {
         // Check if a previous position has been set
         if (this.last_pos.x === -1 || this.last_pos.y === -1) {
 			// Not set, set original position
@@ -59,7 +59,9 @@ class Artist {
             start_x: this.last_pos.x, 
             start_y: this.last_pos.y, 
             end_x: to_pos.x, 
-            end_y: to_pos.y
+            end_y: to_pos.y,
+            width: width,
+            colour: colour
         });
 
 		// Render this action
@@ -90,8 +92,8 @@ class Artist {
         this.context.lineCap = "round";
 
         /* add tool type later */
-        this.context.strokeStyle = this.colour;
-        this.context.lineWidth = this.width;
+        this.context.strokeStyle = canvasAction.colour;
+        this.context.lineWidth = canvasAction.width;
 
         this.context.moveTo(canvasAction.start_x, canvasAction.start_y);
         this.context.lineTo(canvasAction.end_x, canvasAction.end_y);
@@ -146,7 +148,7 @@ class Artist {
         event.preventDefault();
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
-            this.queueAction(currentPos);
+            this.queueAction(currentPos, this.width, this.colour);
 
             const json = { type:"drawing", ...currentPos };
             window.sendJSON(json);
@@ -211,38 +213,32 @@ window.addEventListener('load', () => {
     canvasArtist = new Artist();
 
     // Queue a new action from a socket event
-    window.canvasAction = (to_x, to_y) => {
+    window.canvasAction = (to_x, to_y, width, colour) => {
         const to_pos = { x: to_x, y: to_y }
-        canvasArtist.queueAction(to_pos);
+        canvasArtist.queueAction(to_pos, width, colour);
     };
 
     window.canvasClear = canvasArtist.clear;
     window.canvasStart = canvasArtist.handleStart;
     window.canvasEnd = canvasArtist.handleEnd;
-    window.canvasColour = (colour) => {canvasArtist.swapTool(canvasArtist.tool, canvasArtist.width, colour)};
-    window.canvasWidth = (width) => {canvasArtist.swapTool(canvasArtist.tool, width, canvasArtist.colour)};
 
     document.getElementById("clear").addEventListener("click", () => {
         window.sendJSON({ type:"draw_clear" });
         canvasArtist.clear();
     }); 
     document.getElementById("paint").addEventListener("click", () => {
-        window.sendJSON({ type:"draw_colour", colour:document.getElementById("colour").value });
         canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value);
     });
 
     document.getElementById("eraser").addEventListener("click", () => {
-        window.sendJSON({ type:"draw_colour", colour:"#ffffff" });
         canvasArtist.swapTool(0, canvasArtist.width, "#ffffff");
     });
 
     document.getElementById("colour").addEventListener("change", () => {
-        window.sendJSON({ type:"draw_colour", colour:document.getElementById("colour").value });
         canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value); 
     });
 
     document.getElementById("width").addEventListener("change", () => {
-        window.sendJSON({ type:"draw_width", width: document.getElementById("width").value});
         canvasArtist.swapTool(0, document.getElementById("width").value, canvasArtist.colour);
     });
 });
