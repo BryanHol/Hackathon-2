@@ -216,27 +216,32 @@ window.addEventListener('load', () => {
         canvasArtist.queueAction(to_pos);
     };
 
-    window.canvasTool = canvasArtist.swapTool;
     window.canvasStart = canvasArtist.handleStart;
     window.canvasEnd = canvasArtist.handleEnd;
+    window.canvasColour = (colour) => {canvasArtist.swapTool(canvasArtist.tool, canvasArtist.width, colour)};
+    window.canvasWidth = (width) => {canvasArtist.swapTool(canvasArtist.tool, width, canvasArtist.colour)};
 
     document.getElementById("clear").addEventListener("click", () => {
+        window.sendJSON({ type:"draw_clear" });
         canvasArtist.clear();
-       
     }); 
     document.getElementById("paint").addEventListener("click", () => {
+        window.sendJSON({ type:"draw_colour", colour:document.getElementById("colour").value });
         canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value);
     });
 
     document.getElementById("eraser").addEventListener("click", () => {
-        canvasArtist.swapTool(0, canvasArtist.width, "#ffffffff");
+        window.sendJSON({ type:"draw_colour", colour:"#ffffff" });
+        canvasArtist.swapTool(0, canvasArtist.width, "#ffffff");
     });
 
     document.getElementById("colour").addEventListener("change", () => {
+        window.sendJSON({ type:"draw_colour", colour:document.getElementById("colour").value });
         canvasArtist.swapTool(0, canvasArtist.width, document.getElementById("colour").value); 
     });
 
     document.getElementById("width").addEventListener("change", () => {
+        window.sendJSON({ type:"draw_width", width: document.getElementById("width").value});
         canvasArtist.swapTool(0, document.getElementById("width").value, canvasArtist.colour);
     });
 });
