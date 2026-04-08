@@ -15,6 +15,7 @@ import json             # needed for saving session data in json format
 import time             # needed for timeouts
 from pathlib import Path # needed for file handling; due to MacOS file system
                         # inconsistencies.
+import uuid             # needed for generating unique user IDs
 
 def current_timestamp():
     """
@@ -149,6 +150,33 @@ class AppModel:
         room_state["events"].append(event)
         return event
 
+    def add_user(self, user_data: dict):
+        """
+        Adds a user to the model's user list. Either creates a new user
+        or updates an existing user.
 
+        :param user_data: A dictionary containing the user data, such as the user ID and username.
+        """
+        user_id = user_data.get("user_id")
+        username = user_data.get("username", "Anonymous")
 
+        if user_id and user_id in self.users:
+            self.users[user_id]["username"] = username
+            self.users[user_id]["last_seen"] = current_timestamp()
+            user = dict(self.users[user_id])
+        
+        else:
+            user_id = str(uuid.uuid4()) # Generates a unique user ID using uuid4
+            user = {
+                "user_id": user_id,
+                "username": username,
+                "last_seen": current_timestamp(),
+            }
+            self.users[user_id] = user
+
+        room = str(user_data.get("room", "main")).strip()
+        self.add_event(room, "user_updated", user)
+        self.save_model()
+        return dict(user)
+    
 
