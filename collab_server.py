@@ -179,4 +179,46 @@ class AppModel:
         self.save_model()
         return dict(user)
     
+    def get_user(self, user_data):
+        """
+        Retrieves a user's data from the model. Also updates the user's last seen timestamp
+        and updates username in model if needed. If the user does not exist, creates a new
+        user.
+
+        :param user_id: The ID of the user to retrieve.
+
+        Returns a dictionary containing the user's data, or None if the user does not exist.
+        """
+        user_id = user_data.get("client_id")
+        if user_id and user_id in self.users:
+            self.users[user_id]["last_seen"] = current_timestamp()
+            if "username" in user_data:
+                self.users[user_id]["username"] = user_data["username"]
+            self.save_model()
+            return dict(self.users[user_id])
+        return self.add_user(user_data)
+    
+    # Functions for the text chat
+    def add_message(self, msg_data: dict):
+        """
+        Adds a message to the model's message list for a given room.
+        
+        :param room_data: A dictionary containing the message data, such as the room ID, user ID, and message text.
+        
+        Returns a dictionary containing the message data.
+        """
+        room = str(msg_data.get("room", "main")).strip()
+        room_state = self.create_room(room)
+        message = {
+            "messageText": msg_data.get("messageText", ""),
+            "username": msg_data.get("username", "Anonymous"),
+            "timeStamp": current_timestamp()
+        }
+        self.message_id += 1
+        room_state["messages"].append(message)
+        self.add_event(room, "chat_message", message)
+        self.save_model()
+        return dict(message)
+
+    
 
