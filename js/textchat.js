@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatInput = document.getElementById("chatInput");
     const usernameInput = document.getElementById("usernameInput");
     const saveUsernameButton = document.getElementById("saveUsernameButton");
-    const savedUsername = localStorage.getItem("savedUsername");
+    const savedUsername = sessionStorage.getItem("savedUsername");
     //let username;
     
     // Message object
@@ -108,8 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (name != "") {
             //username = name;
             window.user.username = name;
-            //localStorage.setItem("savedUsername", username);
-            localStorage.setItem("savedUsername", name);
+            //sessionStorage.setItem("savedUsername", username);
+            sessionStorage.setItem("savedUsername", name);
             updateDisplayName();
 
             //alert("Username set to: " + username); // optionally alert for user
