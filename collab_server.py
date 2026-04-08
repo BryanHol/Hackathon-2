@@ -106,6 +106,25 @@ class AppModel:
         self.next_message_id = data.get("next_message_id", 1)
         self.next_stroke_id = data.get("next_stroke_id", 1)
 
+    def save_model(self) -> None:
+        """
+        Saves model data to the .json save file.
+
+        No params.
+        """
+        data = {
+            "users": self.users,
+            "rooms": self.rooms,
+            "event_id": self.next_event_id,
+            "message_id": self.next_message_id,
+            "stroke_id": self.next_stroke_id,
+        }
+
+        path = Path(self.save_file)
+        with path.open("w") as file:
+            json.dump(data, file)
+        
+    
 
 
 
