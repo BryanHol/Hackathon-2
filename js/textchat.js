@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Send message object to server
             //sendJSON(messageJSON);
-            window.sendPacket("messaage", message);
+            window.sendPacket("message", message);
 
             chatInput.value = ""; // clear input box after send
         }

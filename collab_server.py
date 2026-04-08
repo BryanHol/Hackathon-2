@@ -103,9 +103,9 @@ class AppModel:
                 "events": data.get("events", []),
             }
 
-        self.next_event_id = data.get("next_event_id", 1)
-        self.next_message_id = data.get("next_message_id", 1)
-        self.next_stroke_id = data.get("next_stroke_id", 1)
+        self.event_id = data.get("next_event_id", 1)
+        self.message_id = data.get("next_message_id", 1)
+        self.stroke_id = data.get("next_stroke_id", 1)
 
     def save_model(self) -> None:
         """
@@ -116,9 +116,9 @@ class AppModel:
         data = {
             "users": self.users,
             "rooms": self.rooms,
-            "event_id": self.next_event_id,
-            "message_id": self.next_message_id,
-            "stroke_id": self.next_stroke_id,
+            "event_id": self.event_id,
+            "message_id": self.message_id,
+            "stroke_id": self.stroke_id,
         }
 
         path = Path(self.save_file)
@@ -140,13 +140,13 @@ class AppModel:
         """
         room_state = self.create_room(room)
         event = {
-            "event_id": self.next_event_id,
+            "event_id": self.event_id,
             "room": room,
             "type": event_type,
             "time": current_timestamp(),
             "data": data,
         }
-        self.next_event_id += 1 # Increments event ID so every event has a unique ID
+        self.event_id += 1 # Increments event ID so every event has a unique ID
         room_state["events"].append(event)
         return event
 
@@ -279,7 +279,7 @@ class AppModel:
             "users": dict(self.users),
             "messages": list(room_state["messages"]),
             "strokes": list(room_state["strokes"]),
-            "latest_event_id": self.next_event_id - 1,
+            "latest_event_id": self.event_id - 1,
         }
 
 class WebSocketServer:
@@ -303,6 +303,7 @@ class WebSocketServer:
         self.port = 8000 # Default port, though can be changed if needed
         self.connections = {}
         self.active_drawings = {} # Dictionary to track active drawings for each room, keyed by room ID
+
 
     def get_room_connections(self, room: str):
         """
