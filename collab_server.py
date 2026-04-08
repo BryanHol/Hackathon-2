@@ -13,6 +13,8 @@ import asyncio          # contains APIs for asynchronous connections
 import websockets       # contains websocket server and client APIs
 import json             # needed for saving session data in json format
 import time             # needed for timeouts
+from pathlib import Path # needed for file handling; due to MacOS file system
+                        # inconsistencies.
 
 def current_timestamp():
     """
@@ -21,6 +23,9 @@ def current_timestamp():
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 class AppModel:
+    #########################################################################
+    # Important Model Set-Up Functions
+    #########################################################################
     """
     Store all shared application data.
 
@@ -54,24 +59,55 @@ class AppModel:
 
         self.load_model() # Loads model data from save file; initially, it is empty
 
-        def create_room(self, room_id: str) -> dict:
-            """
-            Creates a new room with the given room ID.
+    def create_room(self, room_id: str) -> dict:
+        """
+        Creates a new room with the given room ID.
 
-            :param room_id: The ID of the room to create. This can be anything
-            from a random string to a user-specified name, but it must be unique.
-            """
-            # Guard against creating a room with an ID that already exists
-            if room_id not in self.rooms:
-                self.rooms[room_id] = {
-                "messages": [],
-                "strokes": [],
-                "events": [],
+        :param room_id: The ID of the room to create. This can be anything
+        from a random string to a user-specified name, but it must be unique.
+        """
+        # Guard against creating a room with an ID that already exists
+        if room_id not in self.rooms:
+            self.rooms[room_id] = {
+            "messages": [],
+            "strokes": [],
+            "events": [],
+        }
+            
+        return self.rooms[room_id]
+        
+    def load_model(self) -> None:
+        """
+        Loads model data from the save file.
+
+        No params.
+        """
+        path = Path(self.save_file)
+        if not path.is_file():
+            return # If the file doesn't exist, return; the model is empty
+        
+        with path.open("r") as file:
+            data = json.load(file)
+        
+        self.users = data.get("users", {})
+        self.rooms = data.get("rooms", {})
+
+        # If no room has yet been created, creates a default room named
+        # "main"; occurs if the ...?room=<name> is not used when connecting to
+        # the server.
+        if not self.rooms:
+            self.rooms["main"] = {
+                "messages": data.get("messages", []),
+                "strokes": data.get("strokes", []),
+                "events": data.get("events", []),
             }
-                
-            return self.rooms[room_id]
-        
-        
+
+        self.next_event_id = data.get("next_event_id", 1)
+        self.next_message_id = data.get("next_message_id", 1)
+        self.next_stroke_id = data.get("next_stroke_id", 1)
+
+
+
 
 
 
