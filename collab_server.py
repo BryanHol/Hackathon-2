@@ -267,7 +267,13 @@ class AppModel:
         return dict(stroke)
     
     def get_room_state(self, room: str):
-        """Return the full shared model for one room."""
+        """
+        Return the full shared model for one room.
+
+        :param room: The ID of the room to get the state for.
+
+        Returns a dictionary containing the users, messages, strokes, and latest event ID for the room.
+        """
         room_state = self.create_room(room)
         return {
             "users": dict(self.users),
