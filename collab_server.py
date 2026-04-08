@@ -10,7 +10,7 @@ The new server code also attempts to remove the latency issue found in the code.
 
 # Necessary imports
 import asyncio          # contains APIs for asynchronous connections
-import websockets       # contains websocket server and client APIs
+from websockets.asyncio.server import serve       # contains websocket server and client APIs
 import json             # needed for saving session data in json format
 import time             # needed for timeouts
 from pathlib import Path # needed for file handling; due to MacOS file system
@@ -302,6 +302,7 @@ class WebSocketServer:
         self.host = "localhost"
         self.port = 8000 # Default port, though can be changed if needed
         self.connections = {}
+        self.active_drawings = {} # Dictionary to track active drawings for each room, keyed by room ID
 
     def get_room_connections(self, room: str):
         """
@@ -354,8 +355,81 @@ class WebSocketServer:
 
             # Begin event handling based on the type of event received from the client
             event_type = data.get("type")
-            
 
+            # Text Chat Events
+            # (1) Username is saved into the top box
+            if event_type == "save_user":
+                user = self.model.add_user(data)
+                await websocket.send(json.dumps({
+                    "type": "user_updated",
+                    "user": user
+                }))
+
+            # (2) Message is added to the chat and sent to all clients in the room
+            elif event_type == "message":
+                message = self.model.add_message(data)
+                await websocket.send(json.dumps({
+                    "type": "message_added",
+                    "message": message,
+                    "username": message["username"],
+                    "timestamp": current_timestamp()
+                }))
+
+            # Canvas Events
+            # (1) Drawing is cleared
+            elif event_type == "draw_clear":
+                clear_info = self.model.draw_clear(data)
+                await websocket.send(json.dumps({
+                    "type": "canvas_cleared",
+                    "clear_info": clear_info
+                }))
+
+            # (2) Drawing on the canvas 
+            elif event_type == "draw_start":
+                start_info = self.model.add_stroke(data)
+                await websocket.send(json.dumps({
+                    "type": "canvas_drawing_started",
+                    "start_info": start_info
+                }))
+
+            elif event_type == "drawing":
+                stroke_info = self.model.add_stroke(data)
+                await websocket.send(json.dumps({
+                    "type": "canvas_drawing",
+                    "stroke_info": stroke_info
+                }))
+
+            elif event_type == "draw_end":
+                end_info = self.model.add_stroke(data)
+                await websocket.send(json.dumps({
+                    "type": "canvas_drawing_ended",
+                    "end_info": end_info
+                }))
+            
+            elif event_type == "join_team":
+                team_info = self.model.add_user(data)
+                await websocket.send(json.dumps({
+                    "type": "team_joined",
+                    "team_info": team_info
+                }))
+        
+    async def serve_forever(self) -> None:
+        async with serve(self.handle_event, self.host, self.port):
+            print(f"WebSocket server running on ws://{self.host}:{self.port}")
+            print("Use Ctrl+C to stop the server.")
+            await asyncio.Future()
+
+            
+def main() -> None:
+    server = WebSocketServer()
+
+    try:
+        asyncio.run(server.serve_forever())
+    except KeyboardInterrupt:
+        print("\nServer stopping...")
+
+if __name__ == "__main__":
+    main()
 
 
 
