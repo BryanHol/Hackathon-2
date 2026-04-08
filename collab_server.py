@@ -220,5 +220,60 @@ class AppModel:
         self.save_model()
         return dict(message)
 
+    # Functions for the canvas
+    def draw_clear(self, room_data):
+        """
+        Remove all strokes.
+
+        :param room_data: A dictionary containing the room data.
+        """
+        room = str(room_data.get("room", "main")).strip() or "main"
+        room_state = self.create_room(room)
+        user = self.add_user(room_data)
+        room_state["strokes"] = []
+        clear_info = {
+            "room": room,
+            "user_id": user["user_id"],
+            "cleared_by": user["username"],
+            "time": current_timestamp(),
+        }
+        self.add_event(room, "canvas_cleared", clear_info)
+        self.save_model()
+        return dict(clear_info)
     
+    def add_stroke(self, data):
+        """
+        Adds a stroke to the model's stroke list for a given room.
+
+        :param data: A dictionary containing the data for the stroke.
+
+        Returns a dictionary containing the stroke data.
+        """
+        room = str(data.get("room", "main")).strip() or "main"
+        room_state = self.create_room(room)
+        user = self.add_user(data)
+        stroke = {
+            "stroke_id": self.stroke_id,
+            "client_id": user["client_id"],
+            "username": user["username"],
+            "color": data.get("color", "#000000"),
+            "thickness": data.get("thickness", 1),
+            "time": current_timestamp(),
+        }
+        self.stroke_id += 1
+        room_state["strokes"].append(stroke)
+        self.add_event(room, "stroke_added", stroke)
+        self.save_model()
+        return dict(stroke)
+    
+    def get_room_state(self, room: str):
+        """Return the full shared model for one room."""
+        room_state = self.create_room(room)
+        return {
+            "users": dict(self.users),
+            "messages": list(room_state["messages"]),
+            "strokes": list(room_state["strokes"]),
+            "latest_event_id": self.next_event_id - 1,
+        }
+
 
