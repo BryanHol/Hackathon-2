@@ -57,8 +57,21 @@ class AppModel:
         def create_room(self, room_id: str) -> dict:
             """
             Creates a new room with the given room ID.
+
+            :param room_id: The ID of the room to create. This can be anything
+            from a random string to a user-specified name, but it must be unique.
             """
             # Guard against creating a room with an ID that already exists
-            if 
+            if room_id not in self.rooms:
+                self.rooms[room_id] = {
+                "messages": [],
+                "strokes": [],
+                "events": [],
+            }
+                
+            return self.rooms[room_id]
+        
+        
+
 
 
