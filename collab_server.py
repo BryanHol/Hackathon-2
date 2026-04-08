@@ -282,4 +282,81 @@ class AppModel:
             "latest_event_id": self.next_event_id - 1,
         }
 
+class WebSocketServer:
+    """
+    WebSocket server for handling client connections and communication.
+    This server uses the AppModel to manage the shared state of the application and
+    respond to client events.
+    """
+
+    #########################################################################
+    # Important Server Set-Up Functions
+    #########################################################################
+
+    def __init__(self):
+        """
+        Initializes the WebSocket server with an instance of the AppModel and sets up
+        the server's host, port, and connections dictionary.
+        """
+        self.model = AppModel() # The server's in-memory model of the application
+        self.host = "localhost"
+        self.port = 8000 # Default port, though can be changed if needed
+        self.connections = {}
+
+    def get_room_connections(self, room: str):
+        """
+        Returns a set of all connections for a given room. If the room does
+        not exist, it creates a new empty set for that room and returns it.
+
+        :param room: The ID of the room to get the connections for.
+        """
+        if room not in self.connections:
+            self.connections[room] = set() # Initialize a set to store connections for the room
+        return self.connections[room]
+
+    #########################################################################
+    # Event Handling
+    #########################################################################
+    async def handle_event(self, websocket):
+        """
+        Main websocket event handler. Listens for incoming messages, and sends
+        back responses. Note all try and except guards are removed in order to 
+        (attempt to) reduce latency. In the future, it can be restored if
+        error handling is needed.
+
+        :param websocket: The websocket connection to handle events for.
+        """
+
+        wait = await websocket.recv() # Waits for the first message from the client, which should contain the room information
+        data = json.loads(wait)
+        room = str(data.get("room", "main")).strip()
+        self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
+        
+        user = self.model.get_user(data)
+        self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
+
+        # Registers the user and sends message over websocket
+        await websocket.send(json.dumps({
+            "type": "user_registered",
+            "user": user
+        }))
+
+        # Constructs the initial state of the room and sends it over the websocket
+        await websocket.send(json.dumps({
+            "type": "initial_state",
+            "room": room,
+            "state": self.model.get_room_state(room)
+        }))
+
+        async for wait in websocket: # Listens for incoming messages from the client
+            data = json.loads(wait)
+            data["room"] = room # Ensure the room is included in the data for event handling
+
+            # Begin event handling based on the type of event received from the client
+            event_type = data.get("type")
+            
+
+
+
+
 
