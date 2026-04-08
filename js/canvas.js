@@ -18,8 +18,6 @@ class Artist {
 
     actions = [];	// An array of CanvasAction objects
 
-    messages = []; // An array of message objects in sequence
-
     last_pos = { x: -1, y: -1 };
     drawing = false;
 
@@ -139,9 +137,7 @@ class Artist {
 
         this.handleStart(pos);
 
-        const json = { type:"draw_start", ...pos};
-        window.sendJSON(json);
-        this.messages.push(json)
+        window.sendPacket("draw_start", pos);
     }
 
     handleMove(event) {
@@ -150,9 +146,7 @@ class Artist {
             const currentPos = this.getCoordinates(event);
             this.queueAction(currentPos, this.width, this.colour);
 
-            const json = { type:"drawing", ...currentPos, width:this.width, colour:this.colour };
-            window.sendJSON(json);
-            this.messages.push(json);
+            window.sendPacket("drawing", { ...currentPos, width:this.width, colour:this.colour });
         }
     }
 
@@ -168,9 +162,7 @@ class Artist {
 
         this.handleEnd();
 
-        const json = { type:"draw_end" };
-        window.sendJSON(json);
-        this.messages.push(json);
+        window.sendPacket("draw_end", {});
     }
 
     clear() {
@@ -223,7 +215,7 @@ window.addEventListener('load', () => {
     window.canvasEnd = canvasArtist.handleEnd;
 
     document.getElementById("clear").addEventListener("click", () => {
-        window.sendJSON({ type:"draw_clear" });
+        window.sendPacket("draw_clear", {});
         canvasArtist.clear();
     }); 
     document.getElementById("paint").addEventListener("click", () => {
@@ -243,8 +235,3 @@ window.addEventListener('load', () => {
     });
 });
 
-function playAllMessages() {
-    for (message of canvasArtist.messages) {
-        window.sendJSON(message);
-    }
-}
