@@ -124,8 +124,30 @@ class AppModel:
         with path.open("w") as file:
             json.dump(data, file)
         
-    
+    #########################################################################
+    # Event Handling Functions
+    #########################################################################
+    def add_event(self, room: str, event_type: str, data: dict):
+        """
+        Adds an event to the model's event log.
+        
+        :param room: The ID of the room the event occurred in.
+        :param event_type: The type of the event, such as "message" or "stroke".
+        :param data: A dictionary containing the event data, such as the message text or stroke coordinates.
 
+        Returns a dictionary containing the event data.
+        """
+        room_state = self.create_room(room)
+        event = {
+            "event_id": self.next_event_id,
+            "room": room,
+            "type": event_type,
+            "time": current_timestamp(),
+            "data": data,
+        }
+        self.next_event_id += 1 # Increments event ID so every event has a unique ID
+        room_state["events"].append(event)
+        return event
 
 
 
