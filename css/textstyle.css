@@ -10,6 +10,7 @@ Filename: textstyle.css
     flex: 1;
     min-height: 320px;
     padding: 12px;
+    margin-bottom: 4px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -25,7 +26,8 @@ Filename: textstyle.css
 .chat-shell {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    /*gap: 14px;*/
+    gap: 6px;
     min-height: 100%;
 }
 
@@ -99,15 +101,18 @@ Filename: textstyle.css
 
 #usernameDisplay {
     display: flex;
-    gap: 12px;
+    /*gap: 12px;*/
+    gap: 4px;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 18px;
+    /*padding: 10px 18px;*/
+    padding: 6px 12px;
     
     background: rgba(255, 255, 255, 0.6); 
     border: 1px solid rgba(181, 214, 255, 0.5);
     border-radius: 18px;
-    margin-bottom: 10px;
+    /*margin-bottom: 10px;*/
+    margin-bottom: 4px;
     
     box-shadow: 0 4px 15px rgba(31, 77, 146, 0.05);
 
@@ -119,7 +124,8 @@ Filename: textstyle.css
     width: 100%;
     border: 1px solid rgba(165, 201, 255, 0.9);
     border-radius: 999px;
-    padding: 14px 18px;
+    /*padding: 14px 18px;*/
+    padding: 8px 12px;
     background: rgba(255, 255, 255, 0.92);
     color: #143055;
     font: inherit;
@@ -145,16 +151,19 @@ Filename: textstyle.css
 #writeBox {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
+    /*gap: 12px;*/
+    gap: 8px;
     align-items: center;
-    padding: 14px;
+    /*padding: 14px;*/
+    padding: 4px 8px;
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.42);
     border: 1px solid rgba(255, 255, 255, 0.42);
 }
 
 #sendButton {
-    min-width: 112px;
+    /*min-width: 112px;*/
+    min-width: 60px;
 }
 
 @media (max-width: 640px) {

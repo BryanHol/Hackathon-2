@@ -75,7 +75,8 @@ Filename: team_style.css
 .team-button {
     border: 1px solid transparent;
     border-radius: 999px; /* Pill shape */
-    padding: 10px 20px;
+    /*padding: 10px 20px;*/
+    padding: 10px 6px;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
