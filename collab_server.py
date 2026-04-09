@@ -60,6 +60,8 @@ class AppModel:
 
         self.load_model() # Loads model data from save file; initially, it is empty
 
+        self.game_state = "lobby" # Changes to game if triggered
+
     def create_room(self, room_id: str) -> dict:
         """
         Creates a new room with the given room ID.
@@ -128,7 +130,7 @@ class AppModel:
     #########################################################################
     # Event Handling Functions
     #########################################################################
-    def add_event(self, room: str, event_type: str, data: dict):
+    def add_event(self, room: str, event_type: str, payload: dict):
         """
         Adds an event to the model's event log.
         
@@ -144,21 +146,21 @@ class AppModel:
             "room": room,
             "type": event_type,
             "time": current_timestamp(),
-            "data": data,
+            "data": payload,
         }
         self.event_id += 1 # Increments event ID so every event has a unique ID
         room_state["events"].append(event)
         return event
 
-    def add_user(self, user_data: dict):
+    def add_user(self, payload: dict):
         """
         Adds a user to the model's user list. Either creates a new user
         or updates an existing user.
 
-        :param user_data: A dictionary containing the user data, such as the user ID and username.
+        :param payload: A dictionary containing the user data, such as the user ID and username.
         """
-        user_id = user_data.get("user_id")
-        username = user_data.get("username", "Anonymous")
+        user_id = payload.get("user_id")
+        username = payload.get("username", "Anonymous")
 
         if user_id and user_id in self.users:
             self.users[user_id]["username"] = username
@@ -174,12 +176,12 @@ class AppModel:
             }
             self.users[user_id] = user
 
-        room = str(user_data.get("room", "main")).strip()
+        room = str(payload.get("room", "main")).strip()
         self.add_event(room, "user_updated", user)
         self.save_model()
         return dict(user)
     
-    def get_user(self, user_data):
+    def get_user(self, payload):
         """
         Retrieves a user's data from the model. Also updates the user's last seen timestamp
         and updates username in model if needed. If the user does not exist, creates a new
@@ -189,17 +191,17 @@ class AppModel:
 
         Returns a dictionary containing the user's data, or None if the user does not exist.
         """
-        user_id = user_data.get("client_id")
+        user_id = payload.get("client_id")
         if user_id and user_id in self.users:
             self.users[user_id]["last_seen"] = current_timestamp()
-            if "username" in user_data:
-                self.users[user_id]["username"] = user_data["username"]
+            if "username" in payload:
+                self.users[user_id]["username"] = payload["username"]
             self.save_model()
             return dict(self.users[user_id])
-        return self.add_user(user_data)
-    
+        return self.add_user(payload)
+
     # Functions for the text chat
-    def add_message(self, msg_data: dict):
+    def add_message(self, payload: dict):
         """
         Adds a message to the model's message list for a given room.
         
@@ -207,11 +209,11 @@ class AppModel:
         
         Returns a dictionary containing the message data.
         """
-        room = str(msg_data.get("room", "main")).strip()
+        room = str(payload.get("room", "main")).strip()
         room_state = self.create_room(room)
         message = {
-            "messageText": msg_data.get("messageText", ""),
-            "username": msg_data.get("username", "Anonymous"),
+            "messageText": payload.get("messageText", ""),
+            "username": payload.get("username", "Anonymous"),
             "timeStamp": current_timestamp()
         }
         self.message_id += 1
@@ -221,15 +223,15 @@ class AppModel:
         return dict(message)
 
     # Functions for the canvas
-    def draw_clear(self, room_data):
+    def draw_clear(self, payload: dict):
         """
         Remove all strokes.
 
-        :param room_data: A dictionary containing the room data.
+        :param payload: A dictionary containing the room data.
         """
-        room = str(room_data.get("room", "main")).strip() or "main"
+        room = str(payload.get("room", "main")).strip() or "main"
         room_state = self.create_room(room)
-        user = self.add_user(room_data)
+        user = self.add_user(payload)
         room_state["strokes"] = []
         clear_info = {
             "room": room,
@@ -241,7 +243,7 @@ class AppModel:
         self.save_model()
         return dict(clear_info)
     
-    def add_stroke(self, data):
+    def add_stroke(self, payload):
         """
         Adds a stroke to the model's stroke list for a given room.
 
@@ -249,15 +251,15 @@ class AppModel:
 
         Returns a dictionary containing the stroke data.
         """
-        room = str(data.get("room", "main")).strip() or "main"
+        room = str(payload.get("room", "main")).strip() or "main"
         room_state = self.create_room(room)
-        user = self.add_user(data)
+        user = self.add_user(payload)
         stroke = {
             "stroke_id": self.stroke_id,
             "client_id": user["client_id"],
             "username": user["username"],
-            "color": data.get("color", "#000000"),
-            "thickness": data.get("thickness", 1),
+            "color": payload.get("color", "#000000"),
+            "thickness": payload.get("thickness", 1),
             "time": current_timestamp(),
         }
         self.stroke_id += 1
@@ -331,6 +333,8 @@ class WebSocketServer:
 
         wait = await websocket.recv() # Waits for the first message from the client, which should contain the room information
         data = json.loads(wait)
+        header = data.get("header", {}) # Header should contain type, sender, team, time, and room
+        payload = data.get("payload", {})
         room = str(data.get("room", "main")).strip()
         self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
         
@@ -413,6 +417,9 @@ class WebSocketServer:
                     "type": "team_joined",
                     "team_info": team_info
                 }))
+
+            # Remove open websockets when the connection is closed
+            self.connections[room].remove(websocket)
         
     async def serve_forever(self) -> None:
         async with serve(self.handle_event, self.host, self.port):
