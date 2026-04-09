@@ -44,26 +44,24 @@ class Artist {
         return this;
     }
 
-    queueAction(to_pos, width, colour) {
-        // Check if a previous position has been set
-        if (this.last_pos.x === -1 || this.last_pos.y === -1) {
-			// Not set, set original position
-            this.last_pos = to_pos;
-            return;
+    queueAction(data) {
+        const to_pos = { x:data.x, y:data.y };
+        
+        // Draw if a previous position has been set
+        if (this.last_pos.x != -1 || this.last_pos.y != -1) {
+			// Previous position set, queue a new action
+            this.actions.push({
+                start_x: this.last_pos.x, 
+                start_y: this.last_pos.y, 
+                end_x: data.x, 
+                end_y: data.y,
+                width: data.width,
+                colour: data.colour
+            });
+
+            // Render this action
+            this.render(this.actions[this.actions.length - 1]);
         }
-
-		// Previous position set, queue a new action
-        this.actions.push({
-            start_x: this.last_pos.x, 
-            start_y: this.last_pos.y, 
-            end_x: to_pos.x, 
-            end_y: to_pos.y,
-            width: width,
-            colour: colour
-        });
-
-		// Render this action
-        this.render(this.actions[this.actions.length - 1]);
         
 		// Upgrade original position
         this.last_pos = to_pos; 
@@ -144,15 +142,17 @@ class Artist {
         event.preventDefault();
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
-            this.queueAction(currentPos, this.width, this.colour);
 
-            window.sendPacket("drawing", { ...currentPos, width:this.width, colour:this.colour });
+            const action = { ...currentPos, width:this.width, colour:this.colour }
+
+            this.queueAction(action);
+
+            window.sendPacket("drawing", action);
         }
     }
 
     handleEnd() {
         this.drawing = false;
-
 		// Reset original positon
         this.last_pos = { x: -1, y: -1 };
     }
@@ -205,12 +205,9 @@ window.addEventListener('load', () => {
     canvasArtist = new Artist();
 
     // Queue a new action from a socket event
-    window.canvasAction = (to_x, to_y, width, colour) => {
-        const to_pos = { x: to_x, y: to_y }
-        canvasArtist.queueAction(to_pos, width, colour);
-    };
+    window.canvasAction = (payload) => {canvasArtist.queueAction(payload);};
 
-    window.canvasClear = canvasArtist.clear;
+    window.canvasClear = () => {canvasArtist.clear();};
     window.canvasStart = canvasArtist.handleStart;
     window.canvasEnd = canvasArtist.handleEnd;
 

@@ -39,20 +39,22 @@ socket.addEventListener("message", (event) => {
     // Turn string from socket into a JSON object
     const data = JSON.parse(event.data);
 
-    if(data.type == "message"){
+    if(!data.header) {
+        console.log("INVALID WS MESSAGE RECEIVED");
+        return
+    }
+
+    if(data.header.type == "message"){
         // Place message into DOM
-        const messageText = data.messageText;
-        const username = data.username;
-        const timeStamp = data.timeStamp;
-        window.showMessage(messageText, username, timeStamp);
+        window.showMessage(data.payload);
     } 
-    else if (data.type == "draw_clear")
+    else if (data.header.type == "draw_clear")
         window.canvasClear();
-    else if (data.type == "drawing")
-        window.canvasAction(data.x, data.y, data.width, data.colour);
-    else if (data.type == "draw_start")
-        window.canvasStart(data.x, data.y);
-    else if (data.type == "draw_end")
+    else if (data.header.type == "drawing")
+        window.canvasAction(data.payload);
+    else if (data.header.type == "draw_start")
+        window.canvasStart(data.payload);
+    else if (data.header.type == "draw_end")
         window.canvasEnd();
 
 });
