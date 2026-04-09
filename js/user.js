@@ -10,6 +10,7 @@ Filename: user.js
 window.user = {
     username: "Guest_" + Math.floor(Math.random() * 1000), // init to saved name or generate random temp name
     team: null,
+    room: new URL(location.href).searchParams.get('room'),
     sessionId: null,
     isArtist: false
 };

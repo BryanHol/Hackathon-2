@@ -22,6 +22,7 @@ window.sendPacket = function(type, data) {
         header: {
             type: type, // packet type (string) for routing and parsing by server
             sender: window.user.username, // should this be sessionId instead?
+            room: window.user.room,
             team: window.user.team,
             time: Date.now() // packet timestamp
         },
@@ -30,13 +31,6 @@ window.sendPacket = function(type, data) {
     // Send packet
     socket.send(packet);
 };
-
-// Send JSON object to server
-//export function sendJSON(jsonObj) { - requires modules which requires server hosting of html
-window.sendJSON = function(jsonObj) {
-    // Send JSON as a string
-    socket.send(JSON.stringify(jsonObj));
-}
 
 // Listen for messages
 socket.addEventListener("message", (event) => {
