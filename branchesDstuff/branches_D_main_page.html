@@ -2,27 +2,22 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Collabrative Drawing</title>
-        <meta name="keywords" content="Collabrative, Drawing, Canvas">
+        <title>Collaborative Drawing</title>
+        <meta name="keywords" content="Collaborative, Drawing, Canvas, Chat">
         <meta name="author" content="Andrea, Bryan, Donald, Peter">
         <meta name="description" content="Draw together with a team">
 
-            <script src="js/user.js"></script>    
-            <script src="js/sockets.js"></script>
-			<script src="js/textchat.js"></script>
-			<script src="js/canvas.js"></script>
-            <script src="js/teams.js"></script>
+        <script src="js/sockets.js"></script>
+        <script src="js/textchat.js"></script>
+        <script src="js/canvas.js"></script>
 
-        <link rel="stylesheet" href="css/team_style.css">
         <link rel="stylesheet" href="css/textstyle.css">
-		<link rel="stylesheet" href="css/main_style.css">
+        <link rel="stylesheet" href="css/main_style.css">
     </head>
     <body>
-
         <main-container>
-            
             <header>
-                <h1>Drawing together</h1>
+                <h1>Drawing Together</h1>
                 <p class="subtitle">Sketch, chat, and share ideas in your room.</p>
             </header>
 
@@ -32,7 +27,7 @@
 
                     <div class="tool-panel">
                         <button id="clear" class="pill-button clear-button" type="button">Clear Canvas</button>
-                        
+
                         <div class="tool-group" aria-label="Drawing tools">
                             <label class="tool-button" for="paint">
                                 <input type="radio" name="tool" id="paint" value="paint" checked>
@@ -89,39 +84,22 @@
                     </div>
                 </section>
             </canvas-box>
-    
-            <div class="sidebar">
-                <team-box>
-                    <section class="team-shell">
-                        <div class="team-controls">
-                            <div class="team-status">
-                                Current Team: <span id="current-team-display" class="team-badge no-team">None</span>
-                            </div>
-                            <div class="team-button-group">
-                                <button id="joinTeamRed" class="team-button red" onclick="joinTeam('Red')">Join Red Team</button>
-                                <button id="joinTeamBlue" class="team-button blue" onclick="joinTeam('Blue')">Join Blue Team</button>
-                            </div>
-                        </div>
-                    </section>    
-                </team-box>
 
-                <chat-box>
-                    <section class="chat-shell">
-                        <div id="usernameDisplay" class="glass-strip">
-                            <input type="text" id="usernameInput" autocomplete="off" placeholder="Enter your username">
-                            <button id="saveUsernameButton" type="button">Save</button>
-                        </div>
+            <chat-box>
+                <section class="chat-shell">
+                    <div id="usernameDisplay" class="glass-strip">
+                        <input type="text" id="usernameInput" autocomplete="off" placeholder="Enter your username">
+                        <button id="saveUsernameButton" type="button">Save</button>
+                    </div>
 
-                        <div id="chatHistory"></div>
+                    <div id="chatHistory"></div>
 
-                        <div id="writeBox">
-                            <input type="text" id="chatInput" autocomplete="off" placeholder="Type a message...">
-                            <button id="sendButton" type="button">Send</button>
-                        </div>
-                    </section>
-                </chat-box>    
-            </div>
-		</main-container>
-
+                    <div id="writeBox">
+                        <input type="text" id="chatInput" autocomplete="off" placeholder="Type a message...">
+                        <button id="sendButton" type="button">Send</button>
+                    </div>
+                </section>
+            </chat-box>
+        </main-container>
     </body>
 </html>

@@ -1,15 +1,7 @@
-/*
-Author: David Caudron & Bryan Holl (with the help from their AI Soul™)
-Team Members: Peter Ursem, Bryan Holl, Andrea Restrepo
-Purpose: Styling for basic text chat
-Instructor: FUCK YOU KIDNEY!
-Filename: textstyle.css
-*/
-
 #chatHistory {
     flex: 1;
     min-height: 320px;
-    padding: 12px;
+    padding: 16px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -29,89 +21,37 @@ Filename: textstyle.css
     min-height: 100%;
 }
 
-/* Default Chat Message Styling */
 .chatMessage {
-    max-width: 100%;
-    padding: 8px 12px;
+    max-width: 92%;
+    padding: 12px 14px;
     border-radius: 18px 18px 18px 8px;
     background: rgba(255, 255, 255, 0.82);
     border: 1px solid rgba(190, 218, 255, 0.72);
     box-shadow: 0 10px 16px rgba(21, 56, 110, 0.08);
-    color: #000000;
+    color: #173253;
     line-height: 1.45;
-    border-left-style: solid;
-    border-left-width: 5px;
-}
-
-.text {
-    /* Text wrapping */
-    display: inline-block;
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    max-width: 100%
-}
-
-
-.chatMessage .sender {
-    font-weight: bold;
-    color: #1f5ec3;
-    margin-right: 6px;
 }
 
 .chatMessage .timeStamp {
     display: block;
-    margin-bottom: 0px;
+    margin-bottom: 4px;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.04em;
     color: rgba(23, 50, 83, 0.5);
 }
 
-/* Owner and Team Styling Overrides */
-.messageTeam-Red {
-    border-left-color: #ff4d4d;
-    background: #fff0f0;
-}
-
-.messageTeam-Blue {
-    border-left-color: #4da6ff;
-    background: #f0f8ff;
-}
-
-.messageTeam-Red .sender {
-    color: #ff4d4d;
-}
-
-.messageTeam-Blue .sender {
-    color: #4da6ff;
-}
-
-.chatMessage.messageOwner {
-    border-left-color: #008000;
-    /*color: #008000;*/
-    background: #def8e3;
-}
-
-.messageOwner .sender {
-    color: #008000;
+.chatMessage strong {
+    color: #1f5ec3;
+    margin-right: 6px;
 }
 
 #usernameDisplay {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 18px;
-    
-    background: rgba(255, 255, 255, 0.6); 
-    border: 1px solid rgba(181, 214, 255, 0.5);
-    border-radius: 18px;
-    margin-bottom: 10px;
-    
-    box-shadow: 0 4px 15px rgba(31, 77, 146, 0.05);
-
-    font-weight: bold;
+    padding: 14px;
 }
 
 #usernameInput,

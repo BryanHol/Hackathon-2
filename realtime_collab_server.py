@@ -200,7 +200,7 @@ class AppModel:
 
 
 class CollaborationWebSocketServer:
-    def __init__(self, host: str = "127.0.0.1", port: int = 8765, save_file: str = "collab_state.json") -> None:
+    def __init__(self, host: str = "127.0.0.1", port: int = 8000, save_file: str = "collab_state.json") -> None:
         self.host = host
         self.port = port
         self.model = AppModel(save_file=save_file)
