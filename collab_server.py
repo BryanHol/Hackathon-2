@@ -412,49 +412,66 @@ class WebSocketServer:
             # (2) Message is added to the chat and sent to all clients in the room
             if event_type == "message":
                 message = self.model.add_message(data)
-                await websocket.send(json.dumps({ # Sends the payload
+                await websocket.send(json.dumps({
+                    "header": header,
+                    "payload": {
                     "messageText": message["messageText"],
                     "username": message["username"],
                     "timeStamp": message["timeStamp"]
+                    }
                 }))
 
             # Canvas Events
             # (1) Drawing is cleared; doesn't send any payload back
             elif event_type == "draw_clear":
                 await websocket.send(json.dumps({
+                    "header": header,
+                    "payload": {}
                 }))
 
             # (2) Drawing on the canvas 
             elif event_type == "draw_start":
                 start_info = self.model.add_stroke(data)
                 await websocket.send(json.dumps({
+                    "header": header,
+                    "payload": {
                     "x": start_info["x"],
                     "y": start_info["y"]
+                    }
                 }))
 
             elif event_type == "drawing":
                 stroke_info = self.model.add_stroke(data)
                 await websocket.send(json.dumps({
+                    "header": header,
+                    "payload": {
                     "x": stroke_info["x"],
                     "y": stroke_info["y"],
                     "width": stroke_info["thickness"],
-                    "color": stroke_info["color"],
+                    "color": stroke_info["color"]
+                    }
                 }))
 
             elif event_type == "draw_end":
                 await websocket.send(json.dumps({
+                    "header": header,
+                    "payload": {}
                 }))
             
             elif event_type == "join_team":
                 await websocket.send(json.dumps({
-                    "requested_team": payload.get("team"),
+                    "header": header,
+                    "payload": {
+                    "requested_team": payload.get("team")}
                 }))
 
             else:
                 # Not sure if error handling is accepted client-side
                 await websocket.send(json.dumps({
-                    "type": "error",
-                    "message": f"Unknown event type: {event_type}"
+                    "header": {"type": "error"},
+                    "payload": {
+                        "message": f"Unknown event type: {event_type}"
+                    }
                 }))
 
             # Remove open websockets when the connection is closed
