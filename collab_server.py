@@ -130,36 +130,38 @@ class AppModel:
     #########################################################################
     # Event Handling Functions
     #########################################################################
-    def add_event(self, room: str, event_type: str, payload: dict):
+    def add_event(self, data: dict):
         """
         Adds an event to the model's event log.
-        
-        :param room: The ID of the room the event occurred in.
-        :param event_type: The type of the event, such as "message" or "stroke".
+    
         :param data: A dictionary containing the event data, such as the message text or stroke coordinates.
 
         Returns a dictionary containing the event data.
         """
-        room_state = self.create_room(room)
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        room_state = self.create_room(header["room"])
         event = {
-            "event_id": self.event_id,
-            "room": room,
-            "type": event_type,
-            "time": current_timestamp(),
-            "data": payload,
+            "event_id": self.event_id, # Only used for record keeping; not used by client
+            "header": header,
+            "payload": payload
         }
         self.event_id += 1 # Increments event ID so every event has a unique ID
         room_state["events"].append(event)
         return event
 
-    def add_user(self, payload: dict):
+    def add_user(self, data: dict):
         """
         Adds a user to the model's user list. Either creates a new user
         or updates an existing user.
 
         :param payload: A dictionary containing the user data, such as the user ID and username.
         """
-        user_id = payload.get("user_id")
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        user_id = header.get("sender")
         username = payload.get("username", "Anonymous")
 
         if user_id and user_id in self.users:
@@ -177,39 +179,45 @@ class AppModel:
             self.users[user_id] = user
 
         room = str(payload.get("room", "main")).strip()
-        self.add_event(room, "user_updated", user)
+        self.add_event(data)
         self.save_model()
         return dict(user)
     
-    def get_user(self, payload):
+    def get_user(self, data: dict):
         """
         Retrieves a user's data from the model. Also updates the user's last seen timestamp
         and updates username in model if needed. If the user does not exist, creates a new
         user.
 
-        :param user_id: The ID of the user to retrieve.
+        :param data: A dictionary containing the user data.
 
         Returns a dictionary containing the user's data, or None if the user does not exist.
         """
-        user_id = payload.get("client_id")
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        user_id = header.get("sender")
         if user_id and user_id in self.users:
             self.users[user_id]["last_seen"] = current_timestamp()
             if "username" in payload:
                 self.users[user_id]["username"] = payload["username"]
             self.save_model()
             return dict(self.users[user_id])
-        return self.add_user(payload)
+        return self.add_user(data)
 
     # Functions for the text chat
-    def add_message(self, payload: dict):
+    def add_message(self, data: dict):
         """
         Adds a message to the model's message list for a given room.
         
-        :param room_data: A dictionary containing the message data, such as the room ID, user ID, and message text.
+        :param data: A dictionary containing the message data, such as the room ID, user ID, and message text.
         
         Returns a dictionary containing the message data.
         """
-        room = str(payload.get("room", "main")).strip()
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        room = str(header.get("room", "main")).strip()
         room_state = self.create_room(room)
         message = {
             "messageText": payload.get("messageText", ""),
@@ -218,20 +226,23 @@ class AppModel:
         }
         self.message_id += 1
         room_state["messages"].append(message)
-        self.add_event(room, "chat_message", message)
+        self.add_event(data)
         self.save_model()
         return dict(message)
 
     # Functions for the canvas
-    def draw_clear(self, payload: dict):
+    def draw_clear(self, data: dict):
         """
         Remove all strokes.
 
-        :param payload: A dictionary containing the room data.
+        :param data: A dictionary containing the room data.
         """
-        room = str(payload.get("room", "main")).strip() or "main"
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        room = str(header.get("room", "main")).strip()
         room_state = self.create_room(room)
-        user = self.add_user(payload)
+        user = self.add_user(data)
         room_state["strokes"] = []
         clear_info = {
             "room": room,
@@ -239,11 +250,11 @@ class AppModel:
             "cleared_by": user["username"],
             "time": current_timestamp(),
         }
-        self.add_event(room, "canvas_cleared", clear_info)
+        self.add_event(data)
         self.save_model()
         return dict(clear_info)
     
-    def add_stroke(self, payload):
+    def add_stroke(self, data: dict):
         """
         Adds a stroke to the model's stroke list for a given room.
 
@@ -251,20 +262,25 @@ class AppModel:
 
         Returns a dictionary containing the stroke data.
         """
-        room = str(payload.get("room", "main")).strip() or "main"
+        header = data.get("header", {})
+        payload = data.get("payload", {})
+
+        room = str(header.get("room", "main")).strip()
         room_state = self.create_room(room)
-        user = self.add_user(payload)
+        user = self.add_user(data)
         stroke = {
             "stroke_id": self.stroke_id,
-            "client_id": user["client_id"],
+            "client_id": user["user_id"],
             "username": user["username"],
             "color": payload.get("color", "#000000"),
-            "thickness": payload.get("thickness", 1),
+            "thickness": payload.get("width", 1),
             "time": current_timestamp(),
+            "x": payload.get("x", 0),
+            "y": payload.get("y", 0),
         }
         self.stroke_id += 1
         room_state["strokes"].append(stroke)
-        self.add_event(room, "stroke_added", stroke)
+        self.add_event(data)
         self.save_model()
         return dict(stroke)
     
@@ -282,6 +298,7 @@ class AppModel:
             "messages": list(room_state["messages"]),
             "strokes": list(room_state["strokes"]),
             "latest_event_id": self.event_id - 1,
+            "gamestate": self.game_state,
         }
 
 class WebSocketServer:
@@ -329,25 +346,43 @@ class WebSocketServer:
         error handling is needed.
 
         :param websocket: The websocket connection to handle events for.
+
+        Note: ALL EVENTS ARE ASSUMED TO BE SENT WITH THE FOLLOWING FORMAT
+        AS A JSON PACKET:
+        {
+            "header": {
+                "type": <event_type>,
+                "sender": <user_id>,
+                "room": <room_id>,
+                "team": <team_id>,
+                "time": <timestamp>
+            },
+            "payload": {
+                ...event-specific data...
+            }
+        }
         """
 
         wait = await websocket.recv() # Waits for the first message from the client, which should contain the room information
         data = json.loads(wait)
-        header = data.get("header", {}) # Header should contain type, sender, team, time, and room
-        payload = data.get("payload", {})
-        room = str(data.get("room", "main")).strip()
+
+        header = data.get("header", {}) # Header should contain type, sender, room, team, and time
+
+        room = str(header.get("room", "main")).strip()
         self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
         
-        user = self.model.get_user(data)
+        user = self.model.get_user(header) # Get user data from the sender
         self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
 
         # Registers the user and sends message over websocket
-        await websocket.send(json.dumps({
-            "type": "user_registered",
-            "user": user
-        }))
+        # Note: This is currently not used in the client code, but it can be restored in the future if needed for user registration and updates.
+        # await websocket.send(json.dumps({
+        #     "type": "user_registered",
+        #     "user": user
+        # }))
 
         # Constructs the initial state of the room and sends it over the websocket
+        # Is this used???
         await websocket.send(json.dumps({
             "type": "initial_state",
             "room": room,
@@ -356,66 +391,70 @@ class WebSocketServer:
 
         async for wait in websocket: # Listens for incoming messages from the client
             data = json.loads(wait)
-            data["room"] = room # Ensure the room is included in the data for event handling
+            header = data.get("header", {}) # Header should contain type, sender, room, team, and time
+            payload = data.get("payload", {})
+
+            header["room"] = room # Ensure the room is included in the data for event handling
 
             # Begin event handling based on the type of event received from the client
-            event_type = data.get("type")
+            event_type = header.get("type", "none")
 
             # Text Chat Events
             # (1) Username is saved into the top box
-            if event_type == "save_user":
-                user = self.model.add_user(data)
-                await websocket.send(json.dumps({
-                    "type": "user_updated",
-                    "user": user
-                }))
+            # Note: NOT CURRENTLY USED IN THE CLIENT CODE, but it can be restored in the future if needed for user registration and updates.
+            # if event_type == "save_user":
+            #     user = self.model.add_user(data)
+            #     await websocket.send(json.dumps({
+            #         "type": "user_updated",
+            #         "user": user
+            #     }))
 
             # (2) Message is added to the chat and sent to all clients in the room
-            elif event_type == "message":
+            if event_type == "message":
                 message = self.model.add_message(data)
-                await websocket.send(json.dumps({
-                    "type": "message_added",
-                    "message": message,
+                await websocket.send(json.dumps({ # Sends the payload
+                    "messageText": message["messageText"],
                     "username": message["username"],
-                    "timestamp": current_timestamp()
+                    "timeStamp": message["timeStamp"]
                 }))
 
             # Canvas Events
-            # (1) Drawing is cleared
+            # (1) Drawing is cleared; doesn't send any payload back
             elif event_type == "draw_clear":
-                clear_info = self.model.draw_clear(data)
                 await websocket.send(json.dumps({
-                    "type": "canvas_cleared",
-                    "clear_info": clear_info
                 }))
 
             # (2) Drawing on the canvas 
             elif event_type == "draw_start":
                 start_info = self.model.add_stroke(data)
                 await websocket.send(json.dumps({
-                    "type": "canvas_drawing_started",
-                    "start_info": start_info
+                    "x": start_info["x"],
+                    "y": start_info["y"]
                 }))
 
             elif event_type == "drawing":
                 stroke_info = self.model.add_stroke(data)
                 await websocket.send(json.dumps({
-                    "type": "canvas_drawing",
-                    "stroke_info": stroke_info
+                    "x": stroke_info["x"],
+                    "y": stroke_info["y"],
+                    "width": stroke_info["thickness"],
+                    "color": stroke_info["color"],
                 }))
 
             elif event_type == "draw_end":
-                end_info = self.model.add_stroke(data)
                 await websocket.send(json.dumps({
-                    "type": "canvas_drawing_ended",
-                    "end_info": end_info
                 }))
             
             elif event_type == "join_team":
-                team_info = self.model.add_user(data)
                 await websocket.send(json.dumps({
-                    "type": "team_joined",
-                    "team_info": team_info
+                    "requested_team": payload.get("team"),
+                }))
+
+            else:
+                # Not sure if error handling is accepted client-side
+                await websocket.send(json.dumps({
+                    "type": "error",
+                    "message": f"Unknown event type: {event_type}"
                 }))
 
             # Remove open websockets when the connection is closed
