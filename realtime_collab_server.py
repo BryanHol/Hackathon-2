@@ -9,11 +9,16 @@ from pathlib import Path
 from typing import Any, cast
 from urllib.parse import parse_qs, urlparse
 
+""" Question bank for pictionary game """
+question_bank = {"Buffer Gate","NOT Gate","AND Gate","Adder circuit","D-latch","Flip-flop","XOR Gate","Or Gate","DFA","NFA","Turing Machine","PDA","etc"}
+
 def current_timestamp() -> str:
     """Return a simple timestamp for polling """
     return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
 class AppModel:
+        
+    
     """
     Store all shared application data.
 
@@ -31,6 +36,8 @@ class AppModel:
         self.next_event_id = 1
         self.next_message_id = 1
         self.next_stroke_id = 1
+        self.question_set = {}
+        self.current_question = ""
         self.load_from_disk()
 
     def load_from_disk(self) -> None:
@@ -113,6 +120,26 @@ class AppModel:
 
         return self.register_user(payload)
 
+    def populate_question_set(self):
+        global question_bank
+        copy_bank = question_bank
+        for i in range(10):
+            self.question_set.append(copy_bank.pop())
+
+    def pick_question(self) -> str:
+        if not self.question_set:
+            self.populate_question_set()
+        self.current_question = self.question_set.pop()
+        return self.current_question
+    
+    def check_message_answer(self, message:dict[str, Any]) -> bool:
+        cleaned = message["text"].strip().lower()
+        if cleaned == self.current_question.lower():
+            self.pick_question()
+            return True
+
+        return False 
+
     def add_message(self, payload: dict[str, Any]) -> dict[str, Any]:
         """Store one chat message and add a matching event."""
         user = self.ensure_user(payload)
@@ -123,6 +150,8 @@ class AppModel:
             "text": payload.get("text", ""),
             "time": current_timestamp(),
         }
+        if self.check_message_answer(message):
+            pass    # If message == answer it switches question so probably give yay signal here.
         self.next_message_id += 1
         self.messages.append(message)
         self.add_event("chat_message", message)
