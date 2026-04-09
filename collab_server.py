@@ -371,15 +371,14 @@ class WebSocketServer:
         room = str(header.get("room", "main")).strip()
         self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
         
-        user = self.model.get_user(header) # Get user data from the sender
+        user = self.model.get_user(data) # Get user data from the sender
         self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
 
         # Registers the user and sends message over websocket
-        # Note: This is currently not used in the client code, but it can be restored in the future if needed for user registration and updates.
-        # await websocket.send(json.dumps({
-        #     "type": "user_registered",
-        #     "user": user
-        # }))
+        await websocket.send(json.dumps({
+            "type": "user_registered",
+            "user": user
+        }))
 
         # Constructs the initial state of the room and sends it over the websocket
         # Is this used???
