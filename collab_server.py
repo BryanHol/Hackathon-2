@@ -16,6 +16,7 @@ import time             # needed for timeouts
 from pathlib import Path # needed for file handling; due to MacOS file system
                         # inconsistencies.
 import uuid             # needed for generating unique user IDs
+import os
 
 def current_timestamp():
     """
@@ -592,6 +593,9 @@ class WebSocketServer:
         finally:
             self.get_room_connections(room).discard(websocket)
             self.sessions.pop(websocket, None)
+            if len(self.sessions) == 0:
+                os.remove(self.model.save_file) # Remove the save file if there are no active sessions, so the model is reset for the next time the server is run
+                self.model = AppModel() # Reset the model in memory as well
         
     async def serve_forever(self) -> None:
         async with serve(self.handle_event, self.host, self.port):
