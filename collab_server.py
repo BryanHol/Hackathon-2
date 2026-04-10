@@ -58,9 +58,9 @@ class AppModel:
         self.message_id = 1
         self.stroke_id = 1
 
-        self.game_state = "lobby" # Changes to game if triggered
         self.load_model() # Loads model data from save file; initially, it is empty
 
+        self.game_state = "lobby" # Changes to game if triggered
 
     def create_room(self, room_id: str) -> dict:
         """
@@ -76,6 +76,12 @@ class AppModel:
             "strokes": [],
             "events": [],
         }
+        if "messages" not in self.rooms[room_id]:
+            self.rooms[room_id]["messages"] = []
+        if "strokes" not in self.rooms[room_id]:
+            self.rooms[room_id]["strokes"] = []
+        if "events" not in self.rooms[room_id]:
+            self.rooms[room_id]["events"] = []
             
         return self.rooms[room_id]
         
@@ -105,9 +111,9 @@ class AppModel:
                 "events": data.get("events", []),
             }
 
-        self.event_id = data.get("next_event_id", 1)
-        self.message_id = data.get("next_message_id", 1)
-        self.stroke_id = data.get("next_stroke_id", 1)
+        self.event_id = data.get("event_id", 1)
+        self.message_id = data.get("message_id", 1)
+        self.stroke_id = data.get("stroke_id", 1)
 
     def save_model(self) -> None:
         """
@@ -162,7 +168,7 @@ class AppModel:
         payload = data.get("payload", {})
 
         user_id = header.get("sender")
-        username = payload.get("sender", "Anonymous")
+        username = payload.get("username", payload.get("sender", "Anonymous"))
 
         if user_id and user_id in self.users:
             self.users[user_id]["username"] = username
@@ -170,7 +176,8 @@ class AppModel:
             user = dict(self.users[user_id])
         
         else:
-            user_id = str(uuid.uuid4()) # Generates a unique user ID using uuid4
+            if not user_id:
+                user_id = str(uuid.uuid4()) # Generates a unique user ID using uuid4
             user = {
                 "user_id": user_id,
                 "username": username,
@@ -178,6 +185,10 @@ class AppModel:
             }
             self.users[user_id] = user
 
+        room = payload.get("room", "main")
+        if room is None or str(room).strip() == "":
+            room = "main"
+        room = str(room).strip()
         self.save_model()
         return dict(user)
     
@@ -197,6 +208,8 @@ class AppModel:
         user_id = header.get("sender")
         if user_id and user_id in self.users:
             self.users[user_id]["last_seen"] = current_timestamp()
+            if "username" in payload:
+                self.users[user_id]["username"] = payload["username"]
             if "sender" in payload:
                 self.users[user_id]["username"] = payload["sender"]
             self.save_model()
@@ -215,12 +228,16 @@ class AppModel:
         header = data.get("header", {})
         payload = data.get("payload", {})
 
-        room = str(header.get("room", "main")).strip()
+        room = header.get("room", "main")
+        if room is None or str(room).strip() == "":
+            room = "main"
+        room = str(room).strip()
         room_state = self.create_room(room)
         message = {
-            "messageText": payload.get("messageText", ""),
-            "username": payload.get("username", "Anonymous"),
-            "timeStamp": current_timestamp()
+            "sender": payload.get("sender", payload.get("username", "Anonymous")),
+            "text": payload.get("text", payload.get("messageText", "")),
+            "team": payload.get("team", header.get("team")),
+            "timeStamp": payload.get("timeStamp", current_timestamp())
         }
         self.message_id += 1
         room_state["messages"].append(message)
@@ -239,7 +256,10 @@ class AppModel:
         header = data.get("header", {})
         payload = data.get("payload", {})
 
-        room = str(header.get("room", "main")).strip()
+        room = header.get("room", "main")
+        if room is None or str(room).strip() == "":
+            room = "main"
+        room = str(room).strip()
         room_state = self.create_room(room)
         user = self.add_user(data)
         room_state["strokes"] = []
@@ -265,14 +285,17 @@ class AppModel:
         header = data.get("header", {})
         payload = data.get("payload", {})
 
-        room = str(header.get("room", "main")).strip()
+        room = header.get("room", "main")
+        if room is None or str(room).strip() == "":
+            room = "main"
+        room = str(room).strip()
         room_state = self.create_room(room)
         user = self.add_user(data)
         stroke = {
             "stroke_id": self.stroke_id,
             "client_id": user["user_id"],
             "username": user["username"],
-            "color": payload.get("color", "#000000"),
+            "color": payload.get("colour", payload.get("color", "#000000")),
             "thickness": payload.get("width", 1),
             "time": current_timestamp(),
             "x": payload.get("x", 0),
@@ -328,7 +351,7 @@ class WebSocketServer:
         self.port = 8000 # Default port, though can be changed if needed
         self.connections = {}
         self.active_drawings = {} # Dictionary to track active drawings for each room, keyed by room ID
-        self.sessions = {} # Dictionary to track user sessions, keyed by user ID
+        self.sessions = {}
 
 
     def get_room_connections(self, room: str):
@@ -338,6 +361,9 @@ class WebSocketServer:
 
         :param room: The ID of the room to get the connections for.
         """
+        if room is None or str(room).strip() == "":
+            room = "main"
+        room = str(room).strip()
         if room not in self.connections:
             self.connections[room] = set() # Initialize a set to store connections for the room
         return self.connections[room]
@@ -377,10 +403,13 @@ class WebSocketServer:
             header = data.get("header", {}) # Header should contain type, sender, room, team, and time
             payload = data.get("payload", {})
 
-            room = str(header.get("room", "main")).strip()
+            room = header.get("room", "main")
+            if room is None or str(room).strip() == "":
+                room = "main"
+            room = str(room).strip()
             self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
-            
-            username = payload.get("sender", "Anonymous")
+
+            username = payload.get("username", payload.get("sender", header.get("sender", "Anonymous")))
             session = {
                 "user_id": str(uuid.uuid4()),
                 "username": username,
@@ -405,13 +434,11 @@ class WebSocketServer:
             }))
 
             # Constructs the initial state of the room and sends it over the websocket
-            # Is this used???
             await websocket.send(json.dumps({
                 "type": "initial_state",
                 "room": room,
                 "state": self.model.get_room_state(room)
             }))
-
             room_state = self.model.create_room(room)
             for event in room_state["events"]:
                 await websocket.send(json.dumps({
@@ -426,10 +453,17 @@ class WebSocketServer:
                 header = data.get("header", {}) # Header should contain type, sender, room, team, and time
                 payload = data.get("payload", {})
 
+                if header.get("room") is not None and str(header.get("room")).strip() != "":
+                    if str(header.get("room")).strip() != room:
+                        self.get_room_connections(room).discard(websocket)
+                        room = str(header.get("room")).strip()
+                        self.get_room_connections(room).add(websocket)
                 header["room"] = room # Ensure the room is included in the data for event handling
-                
+
                 if payload.get("sender") is not None and str(payload.get("sender")).strip() != "":
                     session["username"] = payload.get("sender")
+                elif payload.get("username") is not None and str(payload.get("username")).strip() != "":
+                    session["username"] = payload.get("username")
                 header["sender"] = session["user_id"]
                 header["team"] = session["team"]
                 payload["sender"] = session["username"]
@@ -454,58 +488,93 @@ class WebSocketServer:
                 # (2) Message is added to the chat and sent to all clients in the room
                 if event_type == "message":
                     message = self.model.add_message(data)
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {
-                        "messageText": message["messageText"],
-                        "username": message["username"],
-                        "timeStamp": message["timeStamp"]
-                        }
-                    }))
+                    for connection in self.get_room_connections(room):
+                        if connection != websocket:
+                            await connection.send(json.dumps({
+                                "header": {
+                                    "type": "message",
+                                    "room": room,
+                                    "team": session["team"],
+                                },
+                                "payload": {
+                                "sender": message["sender"],
+                                "text": message["text"],
+                                "team": message["team"],
+                                "timeStamp": message["timeStamp"]
+                                }
+                            }))
 
                 # Canvas Events
                 # (1) Drawing is cleared; doesn't send any payload back
                 elif event_type == "draw_clear":
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {}
-                    }))
+                    self.model.draw_clear(data)
+                    for connection in self.get_room_connections(room):
+                        if connection != websocket:
+                            await connection.send(json.dumps({
+                                "header": {
+                                    "type": "draw_clear",
+                                    "room": room,
+                                },
+                                "payload": {}
+                            }))
 
                 # (2) Drawing on the canvas 
                 elif event_type == "draw_start":
-                    start_info = self.model.add_stroke(data)
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {
-                        "x": start_info["x"],
-                        "y": start_info["y"]
-                        }
-                    }))
+                    data["payload"] = {
+                        "x": payload.get("x", 0),
+                        "y": payload.get("y", 0)
+                    }
+                    self.model.add_event(data)
+                    self.model.save_model()
+                    for connection in self.get_room_connections(room):
+                        if connection != websocket:
+                            await connection.send(json.dumps({
+                                "header": {
+                                    "type": "draw_start",
+                                    "room": room,
+                                },
+                                "payload": {
+                                "x": payload.get("x", 0),
+                                "y": payload.get("y", 0)
+                                }
+                            }))
 
                 elif event_type == "drawing":
                     stroke_info = self.model.add_stroke(data)
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {
-                        "x": stroke_info["x"],
-                        "y": stroke_info["y"],
-                        "width": stroke_info["thickness"],
-                        "color": stroke_info["color"]
-                        }
-                    }))
+                    for connection in self.get_room_connections(room):
+                        if connection != websocket:
+                            await connection.send(json.dumps({
+                                "header": {
+                                    "type": "drawing",
+                                    "room": room,
+                                },
+                                "payload": {
+                                "x": stroke_info["x"],
+                                "y": stroke_info["y"],
+                                "width": stroke_info["thickness"],
+                                "colour": stroke_info["color"]
+                                }
+                            }))
 
                 elif event_type == "draw_end":
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {}
-                    }))
+                    data["payload"] = {}
+                    self.model.add_event(data)
+                    self.model.save_model()
+                    for connection in self.get_room_connections(room):
+                        if connection != websocket:
+                            await connection.send(json.dumps({
+                                "header": {
+                                    "type": "draw_end",
+                                    "room": room,
+                                },
+                                "payload": {}
+                            }))
                 
                 elif event_type == "join_team":
-                    await websocket.send(json.dumps({
-                        "header": header,
-                        "payload": {
-                        "requested_team": payload.get("team")}
-                    }))
+                    session["team"] = payload.get("requestedTeam")
+                    header["team"] = session["team"]
+                    data["header"] = header
+                    self.model.get_user(data)
 
                 else:
                     # Not sure if error handling is accepted client-side
@@ -516,9 +585,13 @@ class WebSocketServer:
                         }
                     }))
 
+                wait = await websocket.recv()
+                data = json.loads(wait)
+
             # Remove open websockets when the connection is closed
         finally:
             self.get_room_connections(room).discard(websocket)
+            self.sessions.pop(websocket, None)
         
     async def serve_forever(self) -> None:
         async with serve(self.handle_event, self.host, self.port):
@@ -537,7 +610,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
-
-
