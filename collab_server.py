@@ -162,7 +162,7 @@ class AppModel:
         payload = data.get("payload", {})
 
         user_id = header.get("sender")
-        username = payload.get("username", "Anonymous")
+        username = payload.get("sender", "Anonymous")
 
         if user_id and user_id in self.users:
             self.users[user_id]["username"] = username
@@ -197,8 +197,6 @@ class AppModel:
         user_id = header.get("sender")
         if user_id and user_id in self.users:
             self.users[user_id]["last_seen"] = current_timestamp()
-            if "username" in payload:
-                self.users[user_id]["username"] = payload["username"]
             if "sender" in payload:
                 self.users[user_id]["username"] = payload["sender"]
             self.save_model()
@@ -330,6 +328,7 @@ class WebSocketServer:
         self.port = 8000 # Default port, though can be changed if needed
         self.connections = {}
         self.active_drawings = {} # Dictionary to track active drawings for each room, keyed by room ID
+        self.sessions = {} # Dictionary to track user sessions, keyed by user ID
 
 
     def get_room_connections(self, room: str):
@@ -376,9 +375,25 @@ class WebSocketServer:
             data = json.loads(wait)
 
             header = data.get("header", {}) # Header should contain type, sender, room, team, and time
+            payload = data.get("payload", {})
 
             room = str(header.get("room", "main")).strip()
             self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
+            
+            username = payload.get("sender", "Anonymous")
+            session = {
+                "user_id": str(uuid.uuid4()),
+                "username": username,
+                "team": header.get("team", payload.get("requestedTeam")),
+            }
+            self.sessions[websocket] = session
+            header["sender"] = session["user_id"]
+            header["room"] = room
+            header["team"] = session["team"]
+            payload["sender"] = session["username"]
+            payload["username"] = session["username"]
+            data["header"] = header
+            data["payload"] = payload
             
             user = self.model.get_user(data) # Get user data from the sender
             self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
@@ -397,12 +412,31 @@ class WebSocketServer:
                 "state": self.model.get_room_state(room)
             }))
 
-            async for wait in websocket: # Listens for incoming messages from the client
-                data = json.loads(wait)
+            room_state = self.model.create_room(room)
+            for event in room_state["events"]:
+                await websocket.send(json.dumps({
+                    "header": {
+                        "type": event["header"].get("type"),
+                        "room": room,
+                    },
+                    "payload": dict(event.get("payload", {}))
+                }))
+
+            while True: # Listens for incoming messages from the client
                 header = data.get("header", {}) # Header should contain type, sender, room, team, and time
                 payload = data.get("payload", {})
 
                 header["room"] = room # Ensure the room is included in the data for event handling
+                
+                if payload.get("sender") is not None and str(payload.get("sender")).strip() != "":
+                    session["username"] = payload.get("sender")
+                header["sender"] = session["user_id"]
+                header["team"] = session["team"]
+                payload["sender"] = session["username"]
+                payload["username"] = session["username"]
+                data["header"] = header
+                data["payload"] = payload
+                self.model.get_user(data)
 
                 # Begin event handling based on the type of event received from the client
                 event_type = header.get("type", "none")
