@@ -58,9 +58,9 @@ class AppModel:
         self.message_id = 1
         self.stroke_id = 1
 
+        self.game_state = "lobby" # Changes to game if triggered
         self.load_model() # Loads model data from save file; initially, it is empty
 
-        self.game_state = "lobby" # Changes to game if triggered
 
     def create_room(self, room_id: str) -> dict:
         """
@@ -178,8 +178,6 @@ class AppModel:
             }
             self.users[user_id] = user
 
-        room = str(payload.get("room", "main")).strip()
-        self.add_event(data)
         self.save_model()
         return dict(user)
     
@@ -201,6 +199,8 @@ class AppModel:
             self.users[user_id]["last_seen"] = current_timestamp()
             if "username" in payload:
                 self.users[user_id]["username"] = payload["username"]
+            if "sender" in payload:
+                self.users[user_id]["username"] = payload["sender"]
             self.save_model()
             return dict(self.users[user_id])
         return self.add_user(data)
@@ -226,6 +226,7 @@ class AppModel:
         }
         self.message_id += 1
         room_state["messages"].append(message)
+        data["payload"] = dict(message)
         self.add_event(data)
         self.save_model()
         return dict(message)
@@ -250,6 +251,7 @@ class AppModel:
             "cleared_by": user["username"],
             "time": current_timestamp(),
         }
+        data["payload"] = {}
         self.add_event(data)
         self.save_model()
         return dict(clear_info)
@@ -280,6 +282,12 @@ class AppModel:
         }
         self.stroke_id += 1
         room_state["strokes"].append(stroke)
+        data["payload"] = {
+            "x": stroke["x"],
+            "y": stroke["y"],
+            "width": stroke["thickness"],
+            "colour": stroke["color"]
+        }
         self.add_event(data)
         self.save_model()
         return dict(stroke)
