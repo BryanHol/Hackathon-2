@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Construct element
         messageElement.innerHTML = `
             <span class="timeStamp">${message.timeStamp}</span>
-            <strong>${message.sender}:</strong>
+            <span class="sender">${message.sender}:</span>
             <span class="text">${message.text}</span>
         `;
         

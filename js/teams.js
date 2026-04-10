@@ -21,18 +21,32 @@ document.addEventListener("DOMContentLoaded", () => {
         sendPacket("join_team", joinData);
 
         // Hide buttons once team joined
-        const buttons = document.getElementsByClassName("teamButton"); 
+        const buttons = document.getElementsByClassName("team-button"); 
         for (let button of buttons) {
             button.style.display = 'none';
         };
         
-        window.displayTeamName(teamName);
+        window.updateTeamName(teamName);
 
         console.log("Sent request to join ${teamName}");
     };
 
-    window.displayTeamName = function(teamName) {
-        const teamNameDisplay = document.getElementById("teamNameDisplay");
+    window.updateTeamName = function(teamName) {
+        //const teamNameDisplay = document.getElementById("current-team-display");
+        const teamNameDisplay = document.querySelector("#current-team-display");
+        //teamNameDisplay.textContent = teamName;
         teamNameDisplay.textContent = teamName;
+        //teamNameDisplay.style.color = (teamName.toLowerCase() === 'red') ? '#ba1818' : '#1857ba';
+        
+        // Remove other team classes and add the correct class based on the team
+        teamNameDisplay.classList.remove('no-team', 'red-active', 'blue-active');
+        const team = teamName.toLowerCase();
+        if (team === 'red') {
+            teamNameDisplay.classList.add('red-active');
+        } else if (team === 'blue') {
+            teamNameDisplay.classList.add('blue-active');
+        } else {
+            teamNameDisplay.classList.add('no-team');
+        }
     };
 });

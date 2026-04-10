@@ -1,0 +1,106 @@
+/*
+Author: David Caudron with the help of Gemini
+Team Members: Peter Ursem, Bryan Holl, Andrea Restrepo
+Purpose: Styling for basic text chat
+Instructor: FUCK YOU KIDNEY!
+Filename: team_style.css
+*/
+
+/* Team Control Bar */
+.team-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    margin-bottom: 12px; /* Space between bar and chat */
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 22px;
+}
+
+/* Current Team Display */
+.team-status {
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(181, 214, 255, 0.75);
+    color: #1857ba;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+/* The base badge style */
+.team-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 14px;
+    border-radius: 999px; /* The pill shape */
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin-left: 8px;
+}
+
+/* Default 'None' state */
+.team-badge.no-team {
+    background: rgba(171, 171, 171, 0.2);
+    color: #888;
+}
+
+/* Red Team Badge */
+.team-badge.red-active {
+    background: #e74c3c;
+    color: white;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+/* Blue Team Badge */
+.team-badge.blue-active {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Grouping the buttons */
+.team-button-group {
+    display: flex;
+    gap: 8px; /* Space between the two buttons */
+}
+
+/* Team Button Styling */
+.team-button {
+    border: 1px solid transparent;
+    border-radius: 999px; /* Pill shape */
+    /*padding: 10px 20px;*/
+    padding: 10px 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(31, 77, 146, 0.08);
+}
+
+.team-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(31, 77, 146, 0.15);
+}
+
+/* Team Specific Colors */
+.team-button.red {
+    background: rgba(255, 210, 210, 0.9);
+    border: 1px solid rgba(255, 150, 150, 0.5);
+    color: #ba1818;
+}
+
+.team-button.blue {
+    background: rgba(210, 230, 255, 0.9);
+    border: 1px solid rgba(150, 180, 255, 0.5);
+    color: #1857ba;
+}
+
+.team-button:active {
+    transform: translateY(0);
+}

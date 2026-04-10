@@ -1,4 +1,3 @@
-	
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Nunito:wght@400;600;700;800&display=swap');
 
 :root {
@@ -25,18 +24,14 @@
 
 html,
 body {
-    /*min-height: 100%;*/
-    height: 100%;
-    overflow: hidden;
+    min-height: 100%;
 }
 
 body {
     margin: 0;
-    /*padding: 32px;*/
-    padding: 12px;
+    padding: 32px;
     position: relative;
-    /*overflow-x: hidden;*/
-    overflow: hidden;
+    overflow-x: hidden;
     font-family: 'Nunito', Arial, sans-serif;
     color: var(--ink);
     background:
@@ -78,46 +73,8 @@ main-container {
     grid-template-rows: auto minmax(0, 1fr);
     gap: 24px;
     width: min(1400px, 100%);
-    /*min-height: calc(100vh - 64px);*/
-    height: calc(100vh - 64px);
-    max-height: 100%;
-    overflow-y: auto; /* main-container itself scrolls on very small screens */
+    min-height: calc(100vh - 64px);
     margin: 0 auto;
-    align-items: stretch; /* Force sidebar to match canvas height */
-}
-
-.sidebar {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Important: Takes height from main-container */
-    min-height: 0; /* Allows children to be smaller than their content */
-}
-
-team-box {
-    flex-shrink: 0; /* Keep the team box its natural size */
-}
-
-/* This makes the Chat Box grow to fill all remaining space 
-   while the Team Box stays at its natural size */
-chat-box {
-    flex: 1; 
-    display: flex;
-    flex-direction: column;
-    min-height: 0; /* Critical: Allows the box to shrink/scroll instead of pushing the page down */
-}
-
-.chat-shell {
-    height: 100%; /* Fills the chat-box */
-    display: flex;
-    flex-direction: column;
-}
-
-#chatHistory {
-    flex: 1; /* Makes the history scrollable area take up all the room between the username and input */
-    overflow-y: auto;
-    min-height: 0;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent-soft) transparent;
 }
 
 header,
@@ -129,15 +86,13 @@ chat-box {
 header {
     grid-column: 1 / -1;
     text-align: center;
-    /*padding: 12px 16px 4px;*/
-    padding: 2px 16px 0;
+    padding: 12px 16px 4px;
 }
 
 h1 {
     margin: 0;
     font-family: 'Pacifico', 'Brush Script MT', cursive;
-    /*font-size: clamp(3rem, 6vw, 5.2rem);*/
-    font-size: clamp(1.6rem, 3vw, 2.6rem);
+    font-size: clamp(3rem, 6vw, 5.2rem);
     font-weight: 400;
     letter-spacing: 0.03em;
     color: #ffffff;
@@ -145,11 +100,9 @@ h1 {
 }
 
 .subtitle {
-    /*margin: 10px auto 0;*/
-    margin: 2px auto 0;
+    margin: 10px auto 0;
     max-width: 560px;
-    /*font-size: 1.05rem;*/
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     color: rgba(245, 251, 255, 0.92);
@@ -158,14 +111,12 @@ h1 {
 canvas-box,
 chat-box {
     display: block;
-    min-height: 0;
 }
 
 .canvas-shell,
 .chat-shell {
     height: 100%;
-    /*padding: 22px;*/
-    padding: 18px;
+    padding: 22px;
     background: var(--panel-bg);
     border: 1px solid var(--panel-border);
     border-radius: var(--radius-xl);
@@ -174,12 +125,10 @@ chat-box {
     -webkit-backdrop-filter: blur(14px);
 }
 
-
 .canvas-shell {
     display: flex;
     flex-direction: column;
-    /*gap: 18px;*/
-    gap: 12px;
+    gap: 18px;
 }
 
 canvas {
@@ -188,9 +137,6 @@ canvas {
     max-width: 100%;
     aspect-ratio: 4 / 3;
     height: auto;
-    /*max-height: 55vh;*/
-    height: 100%;
-
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(244, 249, 255, 0.94)),
         linear-gradient(90deg, rgba(66, 135, 245, 0.05) 1px, transparent 1px),
@@ -204,12 +150,10 @@ canvas {
 .tool-panel {
     display: flex;
     flex-wrap: wrap;
-    /*gap: 14px;*/
-    gap: 8px;
+    gap: 14px;
     align-items: stretch;
     justify-content: space-between;
-    /*padding: 14px 16px;*/
-    padding: 8px 10px;
+    padding: 14px 16px;
     border-radius: 24px;
     background: rgba(240, 248, 255, 0.52);
     border: 1px solid rgba(255, 255, 255, 0.44);
@@ -220,8 +164,7 @@ canvas {
 #saveUsernameButton {
     border: none;
     border-radius: 999px;
-    /*padding: 14px 22px;*/
-    padding: 8px 12px;
+    padding: 14px 22px;
     font-family: inherit;
     font-size: 0.98rem;
     font-weight: 800;
@@ -241,19 +184,14 @@ canvas {
     filter: brightness(1.04);
 }
 
-.pill-button.clear-button {
-    /*min-width: 165px;*/
-    min-width: 100px;
-    padding: 8px 12px;
-    /*height: fit-content;*/
-
+.clear-button {
+    min-width: 165px;
 }
 
 .tool-group {
     display: flex;
     flex-wrap: wrap;
-    /*gap: 12px;*/
-    gap: 8px;
+    gap: 12px;
     align-items: center;
 }
 
@@ -272,12 +210,9 @@ canvas {
 .tool-card {
     display: inline-flex;
     align-items: center;
-    /*gap: 10px;*/
-    gap: 8px;
-    /*min-width: 132px;*/
-    min-width: 100px;
-    /*padding: 12px 16px;*/
-    padding: 8px 10px;
+    gap: 10px;
+    min-width: 132px;
+    padding: 12px 16px;
     border-radius: 18px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.72);
@@ -299,10 +234,8 @@ canvas {
 }
 
 .tool-icon {
-    /*width: 40px;
-    height: 40px;*/
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -337,12 +270,9 @@ canvas {
 .adjustment {
     display: flex;
     flex-direction: column;
-    /*gap: 8px;*/
-    gap: 4px;
-    /*min-width: 126px;*/
-    min-width: 100px;
-    /*padding: 10px 14px;*/
-    padding: 6px 10px;
+    gap: 8px;
+    min-width: 126px;
+    padding: 10px 14px;
     background: rgba(255, 255, 255, 0.66);
     border: 1px solid rgba(255, 255, 255, 0.68);
     border-radius: 18px;
@@ -352,10 +282,8 @@ canvas {
 }
 
 .adjustment input[type="color"] {
-    /*width: 52px;
-    height: 52px;*/
-    width: 24px;
-    height: 24px;
+    width: 52px;
+    height: 52px;
     padding: 0;
     border: none;
     border-radius: 14px;
@@ -374,8 +302,7 @@ canvas {
 }
 
 .slider-adjustment {
-    /*min-width: 185px;*/
-    min-width: 150px;
+    min-width: 185px;
 }
 
 .adjustment input[type="range"] {
@@ -383,7 +310,7 @@ canvas {
     accent-color: var(--accent);
 }
 
-.username-display {
+.glass-strip {
     background: rgba(255, 255, 255, 0.46);
     border: 1px solid rgba(255, 255, 255, 0.44);
     border-radius: 20px;
@@ -441,69 +368,3 @@ canvas {
         justify-content: center;
     }
 }
-
-/* OLD MAIN STYLE
-body {
-	margin:0.5% 2.5%;
-	background: radial-gradient(yellow,orangered);
-	background-repeat: no-repeat;
-	background-size: cover;
-}
-
-main-container {
-	display: grid;
-	grid-template-rows: 12% 75% 13%;
-	grid-template-columns: 3fr 2fr;
-	background: radial-gradient(rgb(150, 150, 150),rgb(0, 0, 0));
-	border-radius: 15px;
-}
-
-canvas-box {
-	grid-row:1/4;
-	grid-column:1/2;
-}
-
-canvas {
-	background-color: white;
-	margin: 1.5% 3%;
-	border-radius: 15px;
-}
-
-header {
-	grid-row:1/2;
-	grid-column:2/3;
-	border-radius: 15px;
-}
-h1 {
-	font-size: 50px;
-	font-weight: bold;
-	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
-}
-
-chat-box {
-	display: block;
-	grid-row:2/4;
-	grid-column:2/3;
-	background-color:rgb(197, 197, 197);
-	padding:5px;
-	margin: 3.5%;
-	border-radius: 15px;
-}*/
-
-/* From stackoverflow 
-https://stackoverflow.com/questions/17541614/use-images-instead-of-radio-buttons */
-/*[type=radio] { 
-  position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-[type=radio] + img {
-  cursor: pointer;
-	border-radius: 15px;
-}
-
-[type=radio]:checked + img {
-  outline: 2px solid #f00;
-}*/
