@@ -362,119 +362,121 @@ class WebSocketServer:
             }
         }
         """
-
-        wait = await websocket.recv() # Waits for the first message from the client, which should contain the room information
-        data = json.loads(wait)
-
-        header = data.get("header", {}) # Header should contain type, sender, room, team, and time
-
-        room = str(header.get("room", "main")).strip()
-        self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
-        
-        user = self.model.get_user(data) # Get user data from the sender
-        self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
-
-        # Registers the user and sends message over websocket
-        await websocket.send(json.dumps({
-            "type": "user_registered",
-            "user": user
-        }))
-
-        # Constructs the initial state of the room and sends it over the websocket
-        # Is this used???
-        await websocket.send(json.dumps({
-            "type": "initial_state",
-            "room": room,
-            "state": self.model.get_room_state(room)
-        }))
-
-        async for wait in websocket: # Listens for incoming messages from the client
+        room = "main" # Default room is "main"; if the client doesn't specify a room, they will be placed in the main room
+        try:
+            wait = await websocket.recv() # Waits for the first message from the client, which should contain the room information
             data = json.loads(wait)
+
             header = data.get("header", {}) # Header should contain type, sender, room, team, and time
-            payload = data.get("payload", {})
 
-            header["room"] = room # Ensure the room is included in the data for event handling
-
-            # Begin event handling based on the type of event received from the client
-            event_type = header.get("type", "none")
-
-            # Text Chat Events
-            # (1) Username is saved into the top box
-            # Note: NOT CURRENTLY USED IN THE CLIENT CODE, but it can be restored in the future if needed for user registration and updates.
-            # if event_type == "save_user":
-            #     user = self.model.add_user(data)
-            #     await websocket.send(json.dumps({
-            #         "type": "user_updated",
-            #         "user": user
-            #     }))
-
-            # (2) Message is added to the chat and sent to all clients in the room
-            if event_type == "message":
-                message = self.model.add_message(data)
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {
-                    "messageText": message["messageText"],
-                    "username": message["username"],
-                    "timeStamp": message["timeStamp"]
-                    }
-                }))
-
-            # Canvas Events
-            # (1) Drawing is cleared; doesn't send any payload back
-            elif event_type == "draw_clear":
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {}
-                }))
-
-            # (2) Drawing on the canvas 
-            elif event_type == "draw_start":
-                start_info = self.model.add_stroke(data)
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {
-                    "x": start_info["x"],
-                    "y": start_info["y"]
-                    }
-                }))
-
-            elif event_type == "drawing":
-                stroke_info = self.model.add_stroke(data)
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {
-                    "x": stroke_info["x"],
-                    "y": stroke_info["y"],
-                    "width": stroke_info["thickness"],
-                    "color": stroke_info["color"]
-                    }
-                }))
-
-            elif event_type == "draw_end":
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {}
-                }))
+            room = str(header.get("room", "main")).strip()
+            self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
             
-            elif event_type == "join_team":
-                await websocket.send(json.dumps({
-                    "header": header,
-                    "payload": {
-                    "requested_team": payload.get("team")}
-                }))
+            user = self.model.get_user(data) # Get user data from the sender
+            self.get_room_connections(room).add(websocket) # Add the websocket connection to the set of connections for the room
 
-            else:
-                # Not sure if error handling is accepted client-side
-                await websocket.send(json.dumps({
-                    "header": {"type": "error"},
-                    "payload": {
-                        "message": f"Unknown event type: {event_type}"
-                    }
-                }))
+            # Registers the user and sends message over websocket
+            await websocket.send(json.dumps({
+                "type": "user_registered",
+                "user": user
+            }))
+
+            # Constructs the initial state of the room and sends it over the websocket
+            # Is this used???
+            await websocket.send(json.dumps({
+                "type": "initial_state",
+                "room": room,
+                "state": self.model.get_room_state(room)
+            }))
+
+            async for wait in websocket: # Listens for incoming messages from the client
+                data = json.loads(wait)
+                header = data.get("header", {}) # Header should contain type, sender, room, team, and time
+                payload = data.get("payload", {})
+
+                header["room"] = room # Ensure the room is included in the data for event handling
+
+                # Begin event handling based on the type of event received from the client
+                event_type = header.get("type", "none")
+
+                # Text Chat Events
+                # (1) Username is saved into the top box
+                # Note: NOT CURRENTLY USED IN THE CLIENT CODE, but it can be restored in the future if needed for user registration and updates.
+                # if event_type == "save_user":
+                #     user = self.model.add_user(data)
+                #     await websocket.send(json.dumps({
+                #         "type": "user_updated",
+                #         "user": user
+                #     }))
+
+                # (2) Message is added to the chat and sent to all clients in the room
+                if event_type == "message":
+                    message = self.model.add_message(data)
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {
+                        "messageText": message["messageText"],
+                        "username": message["username"],
+                        "timeStamp": message["timeStamp"]
+                        }
+                    }))
+
+                # Canvas Events
+                # (1) Drawing is cleared; doesn't send any payload back
+                elif event_type == "draw_clear":
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {}
+                    }))
+
+                # (2) Drawing on the canvas 
+                elif event_type == "draw_start":
+                    start_info = self.model.add_stroke(data)
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {
+                        "x": start_info["x"],
+                        "y": start_info["y"]
+                        }
+                    }))
+
+                elif event_type == "drawing":
+                    stroke_info = self.model.add_stroke(data)
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {
+                        "x": stroke_info["x"],
+                        "y": stroke_info["y"],
+                        "width": stroke_info["thickness"],
+                        "color": stroke_info["color"]
+                        }
+                    }))
+
+                elif event_type == "draw_end":
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {}
+                    }))
+                
+                elif event_type == "join_team":
+                    await websocket.send(json.dumps({
+                        "header": header,
+                        "payload": {
+                        "requested_team": payload.get("team")}
+                    }))
+
+                else:
+                    # Not sure if error handling is accepted client-side
+                    await websocket.send(json.dumps({
+                        "header": {"type": "error"},
+                        "payload": {
+                            "message": f"Unknown event type: {event_type}"
+                        }
+                    }))
 
             # Remove open websockets when the connection is closed
-            self.connections[room].remove(websocket)
+        finally:
+            self.get_room_connections(room).discard(websocket)
         
     async def serve_forever(self) -> None:
         async with serve(self.handle_event, self.host, self.port):
