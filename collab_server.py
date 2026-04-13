@@ -301,7 +301,7 @@ class AppModel:
             "tool": payload.get("tool", 0),
             "time": current_timestamp(),
             "x": payload.get("x", 0),
-            "y": payload.get("y", 0),
+            "y": payload.get("y", 0)
         }
         self.stroke_id += 1
         room_state["strokes"].append(stroke)
@@ -309,7 +309,7 @@ class AppModel:
             "x": stroke["x"],
             "y": stroke["y"],
             "width": stroke["thickness"],
-            "y": stroke["tool"],
+            "tool": stroke["tool"],
             "colour": stroke["color"]
         }
         self.add_event(data)
