@@ -37,6 +37,10 @@ class Artist {
             this.clear();
         });
 
+        window.addEventListener('resize', () => {
+            this.handleResize();
+        });
+
         this.setupInput();
         
         this.swapTool(0, 5, "#000000ff");
@@ -89,10 +93,10 @@ class Artist {
 
         /* add tool type later */
         this.context.strokeStyle = canvasAction.colour;
-        this.context.lineWidth = canvasAction.width;
+        this.context.lineWidth = canvasAction.width * this.canvas.width;
 
-        this.context.moveTo(canvasAction.start_x, canvasAction.start_y);
-        this.context.lineTo(canvasAction.end_x, canvasAction.end_y);
+        this.context.moveTo(canvasAction.start_x * this.canvas.width, canvasAction.start_y * this.canvas.height);
+        this.context.lineTo(canvasAction.end_x * this.canvas.width, canvasAction.end_y * this.canvas.height);
 
         this.context.closePath();
         this.context.stroke();
@@ -104,7 +108,7 @@ class Artist {
         let clientX, clientY;
 
         if (event.touches && event.touches.length > 0) {
-            // Handle touch event
+             // Handle touch event
             clientX = event.touches[0].clientX;
             clientY = event.touches[0].clientY;
         } else if (event.changedTouches && event.changedTouches.length > 0) {
@@ -118,8 +122,8 @@ class Artist {
         }
 
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
+            x: (clientX - rect.left) / rect.width,
+            y: (clientY - rect.top) / rect.height
         };
     }
 
@@ -143,7 +147,7 @@ class Artist {
         if (this.drawing) {
             const currentPos = this.getCoordinates(event);
 
-            const action = { ...currentPos, width:this.width, colour:this.colour }
+            const action = { ...currentPos, width: this.width/this.canvas.width, colour: this.colour }
 
             this.queueAction(action);
 
@@ -167,6 +171,24 @@ class Artist {
 
     clear() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.actions = [];
+    }
+
+    redrawAll() {
+        for (let i = 0; i < this.actions.length; i++) {
+            this.render(this.actions[i]);
+        }
+    }
+
+    handleResize() {
+        const rect = this.canvas.getBoundingClientRect();
+        
+        // Update internal resolution to match actual display resolution for crisp lines
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+
+        // Changing dimensions clears the canvas natively, so we must redraw
+        this.redrawAll();
     }
 
     // Enable drawing inputs
