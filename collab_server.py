@@ -298,6 +298,7 @@ class AppModel:
             "username": user["username"],
             "color": payload.get("colour", payload.get("color", "#000000")),
             "thickness": payload.get("width", 1),
+            "tool": payload.get("tool", 0),
             "time": current_timestamp(),
             "x": payload.get("x", 0),
             "y": payload.get("y", 0),
@@ -308,6 +309,7 @@ class AppModel:
             "x": stroke["x"],
             "y": stroke["y"],
             "width": stroke["thickness"],
+            "y": stroke["tool"],
             "colour": stroke["color"]
         }
         self.add_event(data)
@@ -553,6 +555,7 @@ class WebSocketServer:
                                 "x": stroke_info["x"],
                                 "y": stroke_info["y"],
                                 "width": stroke_info["thickness"],
+                                "tool": stroke_info["tool"],
                                 "colour": stroke_info["color"]
                                 }
                             }))
